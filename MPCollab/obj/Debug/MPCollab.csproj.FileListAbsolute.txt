@@ -1,0 +1,2 @@
+c:\users\firstone\documents\visual studio 2015\Projects\MPCollab\MPCollab\bin\Debug\MPCollab.exe.config
+C:\Users\FirstOne\Source\Repos\MPCollab\MPCollab\bin\Debug\MPCollab.exe.config
