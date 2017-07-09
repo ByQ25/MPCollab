@@ -84,8 +84,6 @@ namespace MPCollab
             mainSocket.Listen(1);
             mainSocket.Accept();
             MessageBox.Show("Połączenie nawiązane.");
-            SetCursorPos((int)screenCenter.X, (int)screenCenter.Y);
-            Mouse.OverrideCursor = Cursors.None;
             hostOrClient = true;
             dTimer.Start();
         }
@@ -93,6 +91,8 @@ namespace MPCollab
         private void ClientSideProcedure()
         {
             mainSocket.Connect(textBox.Text, 6656);
+            SetCursorPos((int)screenCenter.X, (int)screenCenter.Y);
+            Mouse.OverrideCursor = Cursors.None;
             hostOrClient = false;
         }
 
@@ -118,7 +118,7 @@ namespace MPCollab
             {
                 case Key.NumPad1: ServerSideProcedure(); break;
                 case Key.NumPad2: ClientSideProcedure(); break;
-                case Key.Escape: dTimer.Stop(); mainSocket.Disconnect(true); break;
+                case Key.Escape: dTimer.Stop(); mainSocket.Disconnect(true); Mouse.OverrideCursor = Cursors.Arrow; break;
             }
         }
 
