@@ -25,10 +25,11 @@ namespace MPCollab
     /// </summary>
     public partial class MainWindow : Window
     {
-        Point mCursor2Pos, screenCenter;
-        DispatcherTimer dTimer;
-        Socket mainSocket;
-        DTO currentDiffs;
+        private Point mCursor2Pos, screenCenter;
+        private DispatcherTimer dTimer;
+        private Socket mainSocket;
+        private DTO currentDiffs;
+        private bool hostOrClient; // true - host, false - client
 
         public MainWindow()
         {
@@ -77,7 +78,7 @@ namespace MPCollab
             throw new ApplicationException("Local IP Address Not Found!");
         }
 
-        private void NamePlaceholder()
+        private void ServerSideProcedure()
         {
             mainSocket.Bind(new IPEndPoint(IPAddress.Parse(textBox.Text), 6656));
             mainSocket.Listen(1);
@@ -85,12 +86,14 @@ namespace MPCollab
             MessageBox.Show("Połączenie nawiązane.");
             SetCursorPos((int)screenCenter.X, (int)screenCenter.Y);
             Mouse.OverrideCursor = Cursors.None;
+            hostOrClient = true;
+            dTimer.Start();
         }
 
-        private void NamePlaceholder2()
+        private void ClientSideProcedure()
         {
             mainSocket.Connect(textBox.Text, 6656);
-            dTimer.Start();
+            hostOrClient = false;
         }
 
         // Events handling:
@@ -113,8 +116,8 @@ namespace MPCollab
         {
             switch(e.Key)
             {
-                case Key.NumPad1: NamePlaceholder(); break;
-                case Key.NumPad2: NamePlaceholder2(); break;
+                case Key.NumPad1: ServerSideProcedure(); break;
+                case Key.NumPad2: ClientSideProcedure(); break;
                 case Key.Escape: dTimer.Stop(); mainSocket.Disconnect(true); break;
             }
         }
@@ -127,21 +130,22 @@ namespace MPCollab
 
         private void buttonHost_Click(object sender, RoutedEventArgs e)
         {
-            NamePlaceholder();
+            ServerSideProcedure();
         }
 
         private void buttonClient_Click(object sender, RoutedEventArgs e)
         {
-            NamePlaceholder2();
+            ClientSideProcedure();
         }
 
         private void MainWin_MouseMove(object sender, MouseEventArgs e)
         {
-            if (mainSocket.Connected)
+            if (!hostOrClient && mainSocket.Connected)
             {
                 Point mouseP = GetMousePosition();
                 currentDiffs = new DTO((int)(mouseP.X - screenCenter.X), (int)(mouseP.Y - screenCenter.Y));
                 mainSocket.Send(ASCIIEncoding.ASCII.GetBytes(currentDiffs.ReturnJSONString()));
+                SetCursorPos((int)screenCenter.X, (int)screenCenter.Y);
             }
         }
     }
