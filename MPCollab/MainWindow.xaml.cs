@@ -48,6 +48,11 @@ namespace MPCollab
             mCursor2Pos = GetMousePosition();
             screenCenter = new Point((int)SystemParameters.PrimaryScreenWidth / 2, (int)SystemParameters.PrimaryScreenHeight / 2);
 
+            //Dodanie skrótu i przypisanej metody
+            RoutedCommand newCmd = new RoutedCommand();
+            newCmd.InputGestures.Add(new KeyGesture(System.Windows.Input.Key.S, ModifierKeys.Control));
+            CommandBindings.Add(new CommandBinding(newCmd, ControlSExecuted));
+
             //mainSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
             try { this.textBox.Text = GetLocalIPAddress(); }
             catch (ApplicationException) { }
@@ -178,6 +183,10 @@ namespace MPCollab
                 SetCursorPos((int)screenCenter.X, (int)screenCenter.Y);
                 System.Threading.Thread.Sleep(17);
             }
+        }
+        private void ControlSExecuted(object sender, ExecutedRoutedEventArgs e)
+        {
+            System.Windows.MessageBox.Show("Wow, działa");
         }
     }
 
