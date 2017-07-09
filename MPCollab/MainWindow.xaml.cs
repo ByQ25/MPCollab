@@ -27,7 +27,7 @@ namespace MPCollab
     {
         private Point mCursor2Pos, screenCenter;
         private DispatcherTimer dTimer;
-        private Socket mainSocket;
+        private Socket mainSocket, clientConnSocket;
         private DTO currentDiffs;
         private bool hostOrClient; // true - host, false - client
 
@@ -82,7 +82,7 @@ namespace MPCollab
         {
             mainSocket.Bind(new IPEndPoint(IPAddress.Parse(textBox.Text), 6656));
             mainSocket.Listen(1);
-            mainSocket.Accept();
+            clientConnSocket = mainSocket.Accept();
             MessageBox.Show("Połączenie nawiązane.");
             hostOrClient = true;
             dTimer.Start();
@@ -100,15 +100,18 @@ namespace MPCollab
         private void dTimer_Tick(object sender, EventArgs e)
         {
             dTimer.Stop();
-            byte[] bufferDTO = new byte[512];
-            mainSocket.Receive(bufferDTO);
-            currentDiffs = JsonConvert.DeserializeObject<DTO>(Convert.ToString(bufferDTO));
-            mCursor2Pos.X += currentDiffs.DiffX;
-            mCursor2Pos.Y += currentDiffs.DiffY;
-            Point tmpMousePos = GetMousePosition();
-            SetCursorPos((int)mCursor2Pos.X, (int)mCursor2Pos.Y);
-            System.Threading.Thread.Sleep(17);
-            SetCursorPos((int)tmpMousePos.X, (int)tmpMousePos.Y);
+            if (clientConnSocket != null)
+            {
+                byte[] bufferDTO = new byte[512];
+                clientConnSocket.Receive(bufferDTO);
+                currentDiffs = JsonConvert.DeserializeObject<DTO>(Convert.ToString(bufferDTO));
+                mCursor2Pos.X += currentDiffs.DiffX;
+                mCursor2Pos.Y += currentDiffs.DiffY;
+                Point tmpMousePos = GetMousePosition();
+                SetCursorPos((int)mCursor2Pos.X, (int)mCursor2Pos.Y);
+                System.Threading.Thread.Sleep(17);
+                SetCursorPos((int)tmpMousePos.X, (int)tmpMousePos.Y);
+            }
             dTimer.Start();
         }
 
@@ -118,14 +121,8 @@ namespace MPCollab
             {
                 case Key.NumPad1: ServerSideProcedure(); break;
                 case Key.NumPad2: ClientSideProcedure(); break;
-                case Key.Escape: dTimer.Stop(); mainSocket.Disconnect(true); Mouse.OverrideCursor = Cursors.Arrow; break;
+                case Key.Escape: dTimer.Stop(); mainSocket.Disconnect(true); clientConnSocket.Dispose(); Mouse.OverrideCursor = Cursors.Arrow; break;
             }
-        }
-
-        private void UpdateCursorPos(DTO diffsDTO)
-        {
-            Point mouseP = GetMousePosition();
-            SetCursorPos((int)mouseP.X + diffsDTO.DiffX, (int)mouseP.Y + diffsDTO.DiffY);
         }
 
         private void buttonHost_Click(object sender, RoutedEventArgs e)
