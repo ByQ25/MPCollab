@@ -1,9 +1,9 @@
 ﻿using System;
 using System.IO;
+using System.Text;
 using Newtonsoft.Json;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
@@ -132,7 +132,9 @@ namespace MPCollab
             if (bReader != null)
             {
                 // Receiving JSON via stream from TCPClientSocket:
-                string tmp = bReader.ReadString();
+                string tmp = "";
+                try { tmp = bReader.ReadString(); }
+                catch { RestoreAppToInitialState(); }
                 currentDiffs = JsonConvert.DeserializeObject<DTO>(tmp);
                 mCursor2Pos.X += currentDiffs.DiffX;
                 mCursor2Pos.Y += currentDiffs.DiffY;
@@ -171,8 +173,10 @@ namespace MPCollab
                 Point mouseP = GetMousePosition();
                 currentDiffs = new DTO((int)(mouseP.X - screenCenter.X), (int)(mouseP.Y - screenCenter.Y));
                 // Sending JSON via stream from TCPClientSocket:
-                bWriter.Write(currentDiffs.ReturnJSONString());
+                try { bWriter.Write(currentDiffs.ReturnJSONString()); }
+                catch (IOException) { RestoreAppToInitialState(); }
                 SetCursorPos((int)screenCenter.X, (int)screenCenter.Y);
+                System.Threading.Thread.Sleep(17);
             }
         }
     }
