@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using Newtonsoft.Json;
 using System.Net;
 using System.Net.Sockets;
@@ -27,8 +28,12 @@ namespace MPCollab
     {
         private Point mCursor2Pos, screenCenter;
         private DispatcherTimer dTimer;
-        private Socket mainSocket, clientConnSocket;
+        private TcpListener serverSocket;
+        private TcpClient clientSocket;
         private DTO currentDiffs;
+        private BinaryReader bReader;
+        private BinaryWriter bWriter;
+
         private bool hostOrClient; // true - host, false - client
 
         public MainWindow()
@@ -43,7 +48,7 @@ namespace MPCollab
             mCursor2Pos = GetMousePosition();
             screenCenter = new Point((int)SystemParameters.PrimaryScreenWidth / 2, (int)SystemParameters.PrimaryScreenHeight / 2);
 
-            mainSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
+            //mainSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
             try { this.textBox.Text = GetLocalIPAddress(); }
             catch (ApplicationException) { }
         }
@@ -80,9 +85,10 @@ namespace MPCollab
 
         private void ServerSideProcedure()
         {
-            mainSocket.Bind(new IPEndPoint(IPAddress.Parse(textBox.Text), 6656));
-            mainSocket.Listen(1);
-            clientConnSocket = mainSocket.Accept();
+            serverSocket = new TcpListener(IPAddress.Parse(textBox.Text), 6656);
+            serverSocket.Start();
+            clientSocket = serverSocket.AcceptTcpClient();
+            bReader = new BinaryReader(clientSocket.GetStream());
             MessageBox.Show("Połączenie nawiązane.");
             hostOrClient = true;
             dTimer.Start();
@@ -90,21 +96,44 @@ namespace MPCollab
 
         private void ClientSideProcedure()
         {
-            mainSocket.Connect(textBox.Text, 6656);
+            clientSocket = new TcpClient(textBox.Text, 6656);
+            bWriter = new BinaryWriter(clientSocket.GetStream());
             SetCursorPos((int)screenCenter.X, (int)screenCenter.Y);
             Mouse.OverrideCursor = Cursors.None;
             hostOrClient = false;
+        }
+
+        private void RestoreAppToInitialState()
+        {
+            dTimer.Stop();
+            clientSocket.Close();
+            clientSocket = null;
+            if (hostOrClient)
+            {
+                serverSocket.Stop();
+                serverSocket = null;
+                bReader.Close();
+                bReader.Dispose();
+                bReader = null;
+            }
+            else
+            {
+                bWriter.Close();
+                bWriter.Dispose();
+                bWriter = null;
+            }
+            Mouse.OverrideCursor = Cursors.Arrow;
         }
 
         // Events handling:
         private void dTimer_Tick(object sender, EventArgs e)
         {
             dTimer.Stop();
-            if (clientConnSocket != null)
+            if (bReader != null)
             {
-                byte[] bufferDTO = new byte[512];
-                clientConnSocket.Receive(bufferDTO);
-                currentDiffs = JsonConvert.DeserializeObject<DTO>(Convert.ToString(bufferDTO));
+                // Receiving JSON via stream from TCPClientSocket:
+                string tmp = bReader.ReadString();
+                currentDiffs = JsonConvert.DeserializeObject<DTO>(tmp);
                 mCursor2Pos.X += currentDiffs.DiffX;
                 mCursor2Pos.Y += currentDiffs.DiffY;
                 Point tmpMousePos = GetMousePosition();
@@ -121,7 +150,7 @@ namespace MPCollab
             {
                 case Key.NumPad1: ServerSideProcedure(); break;
                 case Key.NumPad2: ClientSideProcedure(); break;
-                case Key.Escape: dTimer.Stop(); mainSocket.Disconnect(true); clientConnSocket.Dispose(); Mouse.OverrideCursor = Cursors.Arrow; break;
+                case Key.Escape: RestoreAppToInitialState(); break;
             }
         }
 
@@ -137,11 +166,12 @@ namespace MPCollab
 
         private void MainWin_MouseMove(object sender, MouseEventArgs e)
         {
-            if (!hostOrClient && mainSocket.Connected)
+            if (clientSocket != null && clientSocket.Connected && !hostOrClient)
             {
                 Point mouseP = GetMousePosition();
                 currentDiffs = new DTO((int)(mouseP.X - screenCenter.X), (int)(mouseP.Y - screenCenter.Y));
-                mainSocket.Send(ASCIIEncoding.ASCII.GetBytes(currentDiffs.ReturnJSONString()));
+                // Sending JSON via stream from TCPClientSocket:
+                bWriter.Write(currentDiffs.ReturnJSONString());
                 SetCursorPos((int)screenCenter.X, (int)screenCenter.Y);
             }
         }
