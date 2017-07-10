@@ -198,6 +198,7 @@ namespace MPCollab
         private bool clickLPM, clickPPM;
 
         // Constructors:
+        [JsonConstructor]
         public DTO(int diffX, int diffY, bool clickLPM, bool clickPPM)
         {
             this.diffX = diffX;
