@@ -23,7 +23,6 @@ namespace MPCollab
         public Komputer()
         {
             InitializeComponent();
-            
         }
     }
 }

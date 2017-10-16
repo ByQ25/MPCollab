@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:MPCollab"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
-    <Grid Margin="0,0,35,0">
+    <Grid>
         <Rectangle Fill="LightBlue" Opacity="1" HorizontalAlignment="Left" Height="80" Margin="91,32,0,0" Stroke="#FFFFFF" VerticalAlignment="Top" Width="138" RadiusX="20" RadiusY="20"/>
         <Rectangle Fill="#FFFFFF" Opacity="1" HorizontalAlignment="Left" Height="72" Margin="96,36,0,0" Stroke="#FFFFFF" VerticalAlignment="Top" Width="128" RadiusX="20" RadiusY="20"/>
         <Rectangle Fill="LightBlue" HorizontalAlignment="Left" Height="8" Margin="126,115,0,0" RadiusY="7" RadiusX="7" Stroke="#FFFFFF" VerticalAlignment="Top" Width="68"/>
