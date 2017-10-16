@@ -44,7 +44,6 @@ namespace MPCollab
             newCmd.InputGestures.Add(new KeyGesture(System.Windows.Input.Key.S, ModifierKeys.Control));
             CommandBindings.Add(new CommandBinding(newCmd, ControlSExecuted));
 
-            //mainSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
             try { this.textBox.Text = GetLocalIPAddress(); }
             catch (ApplicationException) { }
         }
@@ -110,17 +109,17 @@ namespace MPCollab
 
         private void MainWin_MouseMove(object sender, MouseEventArgs e)
         {
-            throw new NotImplementedException();
+            TCH.HandleMouseMove();
         }
 
         private void MainWin_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            throw new NotImplementedException();
+            TCH.HandleMouseClick(TwoCursorsHandler.MButtons.LMB);
         }
 
         private void MainWin_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
-            throw new NotImplementedException();
+            TCH.HandleMouseClick(TwoCursorsHandler.MButtons.RMB);
         }
 
         private void ControlSExecuted(object sender, ExecutedRoutedEventArgs e)

@@ -14,13 +14,10 @@
         <Button x:Name="buttonClient" Content="Połącz" HorizontalAlignment="Left" Margin="141,264,0,0" VerticalAlignment="Top" Width="75" Click="buttonClient_Click"/>
         <TextBox x:Name="textBox_Copy" HorizontalAlignment="Left" Height="23" Margin="260,50,0,0" TextWrapping="Wrap" Text="192.168.0.22" VerticalAlignment="Top" Width="100"/>
         <Viewbox StretchDirection="Both" Stretch="Uniform" Margin="40,57,377,162" Height="100" Width="100">
-            <custom:Komputer/>
         </Viewbox>
         <Viewbox StretchDirection="Both" Stretch="Uniform" Margin="260,57,157,162" Height="100" Width="100">
-            <custom:Komputer/>
         </Viewbox>
         <Viewbox StretchDirection="Both" Stretch="Uniform" Margin="150,57,267,162" Height="100" Width="100">
-            <custom:Komputer/>
         </Viewbox>
         <Label Content="Najlepszy label ever." HorizontalAlignment="Left" Margin="280,264,0,0" VerticalAlignment="Top" Width="184"/>
     </Grid>

@@ -35,6 +35,7 @@ namespace MPCollab
             //mCursor2Pos = PointToScreen(Mouse.GetPosition(this));
             mCursor2Pos = GetMousePosition();
             screenCenter = new Point((int)SystemParameters.PrimaryScreenWidth / 2, (int)SystemParameters.PrimaryScreenHeight / 2);
+            //mainSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
             if (hostOrClient)
             {
                 this.serverSocket = new TcpListener(IPAddress.Parse(ip), 6656);
