@@ -103,12 +103,12 @@ namespace MPCollab
 
         private void MainWin_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            TCH.HandleMouseClick(TwoCursorsHandler.MButtons.LMB);
+            if (TCH != null) TCH.HandleMouseClick(TwoCursorsHandler.MButtons.LMB);
         }
 
         private void MainWin_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
-            TCH.HandleMouseClick(TwoCursorsHandler.MButtons.RMB);
+            if (TCH != null) TCH.HandleMouseClick(TwoCursorsHandler.MButtons.RMB);
         }
 
         private void ControlSExecuted(object sender, ExecutedRoutedEventArgs e)
