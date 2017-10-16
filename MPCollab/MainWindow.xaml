@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MPCollab"
         mc:Ignorable="d"
-        Title="MPCollab" Height="350" Width="525" WindowStartupLocation="CenterScreen" KeyDown="MainWin_KeyDown" MouseMove="MainWin_MouseMove">
+        Title="MPCollab" Height="350" Width="525" WindowStartupLocation="CenterScreen" KeyDown="MainWin_KeyDown" MouseMove="MainWin_MouseMove" MouseLeftButtonDown="MainWin_MouseLeftButtonDown" MouseRightButtonDown="MainWin_MouseRightButtonDown">
     <Grid>
         <Label x:Name="labelIP" Content="Adres IP:" HorizontalAlignment="Left" Height="25" Margin="40,19,0,0" VerticalAlignment="Top" Width="70"/>
         <TextBox x:Name="textBox" HorizontalAlignment="Left" Height="23" Margin="40,44,0,0" TextWrapping="Wrap" Text="192.168.0.22" VerticalAlignment="Top" Width="120"/>
