@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using System.Net;
 using System.Net.Sockets;
 using System.Windows;
+using System.Diagnostics;
 using System.Windows.Input;
 using System.Windows.Threading;
 using System.Runtime.InteropServices;
@@ -28,6 +29,7 @@ namespace MPCollab
     {
         private Point mCursor2Pos, screenCenter;
         private DispatcherTimer dTimer;
+        private Stopwatch stoper;
         private TcpListener serverSocket;
         private TcpClient clientSocket;
         private DTO currentDiffs;
@@ -35,16 +37,17 @@ namespace MPCollab
         private BinaryWriter bWriter;
 
         private bool hostOrClient; // true - host, false - client
-
-        //komentarz do testu
+        private const int timeWin = 17;
 
         public MainWindow()
         {
             InitializeComponent();
 
             dTimer = new DispatcherTimer();
-            dTimer.Interval = new TimeSpan(0, 0, 0, 0, 17);
+            dTimer.Interval = new TimeSpan(0, 0, 0, 0, timeWin);
             dTimer.Tick += dTimer_Tick;
+
+            stoper = new Stopwatch();
 
             //mCursor2Pos = PointToScreen(Mouse.GetPosition(this));
             mCursor2Pos = GetMousePosition();
@@ -61,6 +64,14 @@ namespace MPCollab
         }
 
         // Additional methods:
+        private const int MOUSEEVENT_K_LEFTDOWN = 0x02;
+        private const int MOUSEEVENT_K_LEFTUP = 0x04;
+        private const int MOUSEEVENT_K_RIGHTDOWN = 0x08;
+        private const int MOUSEEVENT_K_RIGHTUP = 0x10;
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall)]
+        public static extern void mouse_event(uint dwFlags, uint dx, uint dy, uint cButtons, uint dwExtraInfo);
+
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
         internal static extern bool GetCursorPos(ref Win32Point pt);
@@ -96,6 +107,7 @@ namespace MPCollab
             serverSocket.Start();
             clientSocket = serverSocket.AcceptTcpClient();
             bReader = new BinaryReader(clientSocket.GetStream());
+            bWriter = new BinaryWriter(clientSocket.GetStream());
             MessageBox.Show("Połączenie nawiązane.");
             hostOrClient = true;
             dTimer.Start();
@@ -104,6 +116,7 @@ namespace MPCollab
         private void ClientSideProcedure()
         {
             clientSocket = new TcpClient(textBox.Text, 6656);
+            bReader = new BinaryReader(clientSocket.GetStream());
             bWriter = new BinaryWriter(clientSocket.GetStream());
             SetCursorPos((int)screenCenter.X, (int)screenCenter.Y);
             Mouse.OverrideCursor = Cursors.None;
@@ -138,6 +151,8 @@ namespace MPCollab
             dTimer.Stop();
             if (bReader != null)
             {
+                stoper.Reset();
+                stoper.Start();
                 // Receiving JSON via stream from TCPClientSocket:
                 string tmp = "";
                 try { tmp = bReader.ReadString(); }
@@ -147,7 +162,25 @@ namespace MPCollab
                 mCursor2Pos.Y += currentDiffs.DiffY;
                 Point tmpMousePos = GetMousePosition();
                 SetCursorPos((int)mCursor2Pos.X, (int)mCursor2Pos.Y);
-                System.Threading.Thread.Sleep(17);
+
+                // Mouse clicks handling:
+                if (currentDiffs.LPMClicked)
+                { 
+                    mouse_event(MOUSEEVENT_K_LEFTDOWN, (uint)mCursor2Pos.X, (uint)mCursor2Pos.Y, 0, 0);
+                    mouse_event(MOUSEEVENT_K_LEFTUP, (uint)mCursor2Pos.X, (uint)mCursor2Pos.Y, 0, 0);
+                }
+                if (currentDiffs.PPMClicked)
+                {
+                    mouse_event(MOUSEEVENT_K_RIGHTDOWN, (uint)mCursor2Pos.X, (uint)mCursor2Pos.Y, 0, 0);
+                    mouse_event(MOUSEEVENT_K_RIGHTUP, (uint)mCursor2Pos.X, (uint)mCursor2Pos.Y, 0, 0);
+                }
+
+                // Sending acknowledgement:
+                try { bWriter.Write(true); }
+                catch (IOException) { RestoreAppToInitialState(); }
+                stoper.Stop();
+                int dt = Convert.ToInt32(stoper.ElapsedMilliseconds);
+                System.Threading.Thread.Sleep(dt < timeWin + 1 ? timeWin - dt : 0);
                 SetCursorPos((int)tmpMousePos.X, (int)tmpMousePos.Y);
             }
             dTimer.Start();
@@ -177,15 +210,22 @@ namespace MPCollab
         {
             if (clientSocket != null && clientSocket.Connected && !hostOrClient)
             {
+                stoper.Reset();
+                stoper.Start();
                 Point mouseP = GetMousePosition();
                 currentDiffs = new DTO((int)(mouseP.X - screenCenter.X), (int)(mouseP.Y - screenCenter.Y));
                 // Sending JSON via stream from TCPClientSocket:
                 try { bWriter.Write(currentDiffs.ReturnJSONString()); }
                 catch (IOException) { RestoreAppToInitialState(); }
                 SetCursorPos((int)screenCenter.X, (int)screenCenter.Y);
-                System.Threading.Thread.Sleep(17);
+                try { if (!bReader.ReadBoolean()) RestoreAppToInitialState(); }
+                catch { RestoreAppToInitialState(); }
+                stoper.Stop();
+                int dt = Convert.ToInt32(stoper.ElapsedMilliseconds);
+                System.Threading.Thread.Sleep(dt < timeWin + 1 ? timeWin - dt : 0);
             }
         }
+
         private void ControlSExecuted(object sender, ExecutedRoutedEventArgs e)
         {
             System.Windows.MessageBox.Show("Wow, działa");
