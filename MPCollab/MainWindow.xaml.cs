@@ -54,6 +54,7 @@ namespace MPCollab
         {
             hostOrClient = true;
             TCH = new TwoCursorsHandler(textBox.Text, timeWin, hostOrClient);
+            TCH.StartServer();
             MessageBox.Show("Połączenie nawiązane.");
         }
 
@@ -66,7 +67,11 @@ namespace MPCollab
 
         private void RestoreAppToInitialState()
         {
-            TCH.Dispose();
+            if (TCH != null)
+            {
+                TCH.StopServer();
+                TCH.Dispose();
+            }
             Mouse.OverrideCursor = Cursors.Arrow;
         }
 

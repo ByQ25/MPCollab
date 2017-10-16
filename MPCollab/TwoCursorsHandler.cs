@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Windows;
 using System.Diagnostics;
+using System.Threading;
 using System.Windows.Threading;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
@@ -14,15 +15,16 @@ namespace MPCollab
     class TwoCursorsHandler : IDisposable
     {
         private Point mCursor2Pos, screenCenter;
-        private Stopwatch stoper;
+        private Stopwatch stoper1, stoper2;
         private TcpListener serverSocket;
         private TcpClient clientSocket;
         private BinaryReader bReader;
         private BinaryWriter bWriter;
+        private Thread curSwitcher;
         private DTO currentDiffs;
-        private bool disposed, switchCursors, hostOrClient;
+        private bool disposed, runServer, switchCursors, hostOrClient, clickLMB, clickRMB;
         private int timeWin;
-        private object threadLock;
+        private object threadLock1, threadLock2, threadLock3;
         private const int MOUSEEVENT_K_LEFTDOWN = 0x02;
         private const int MOUSEEVENT_K_LEFTUP = 0x04;
         private const int MOUSEEVENT_K_RIGHTDOWN = 0x08;
@@ -32,10 +34,14 @@ namespace MPCollab
         {
             this.disposed = false;
             this.switchCursors = false;
+            this.runServer = true;
             this.hostOrClient = hostOrClient;
             this.timeWin = timeWin;
-            this.threadLock = new object();
-            this.stoper = new Stopwatch();
+            this.threadLock1 = new object();
+            this.threadLock2 = new object();
+            this.threadLock3 = new object();
+            this.stoper1 = new Stopwatch();
+            this.stoper2 = new Stopwatch();
             //mCursor2Pos = PointToScreen(Mouse.GetPosition(this));
             mCursor2Pos = GetMousePosition();
             screenCenter = new Point((int)SystemParameters.PrimaryScreenWidth / 2, (int)SystemParameters.PrimaryScreenHeight / 2);
@@ -79,25 +85,7 @@ namespace MPCollab
             Win32Point w32Mouse = new Win32Point();
             GetCursorPos(ref w32Mouse);
             return new Point(w32Mouse.X, w32Mouse.Y);
-        }
-
-        private void SendDTO(BinaryReader bReader, BinaryWriter bWriter, DTO dto)
-        {
-            stoper.Reset();
-            stoper.Start();
-            // Sending JSON via stream from TCPClientSocket:
-            try { bWriter.Write(dto.ReturnJSONString()); }
-            catch (IOException ex) {
-                throw new TCHException(string.Format("Error occured while sending DTO.\n\nDetails:\n{0}", ex.Message));
-            }
-            try { if (!bReader.ReadBoolean()) throw new TCHException("False acknowledgement received from the server."); }
-            catch (Exception ex) {
-                throw new TCHException(string.Format("Error occured while receiving acknowledgement DTO.\n\nDetails:\n{0}", ex.Message));
-            }
-            stoper.Stop();
-            int dt = Convert.ToInt32(stoper.ElapsedMilliseconds);
-            System.Threading.Thread.Sleep(dt < timeWin + 1 ? timeWin - dt : 0);
-        }
+        } 
 
         public void HandleMouseMove()
         {
@@ -120,28 +108,89 @@ namespace MPCollab
                 }
         }
 
+        public void StartServer()
+        {
+            if (!this.runServer)
+            {
+                int dt;
+                this.runServer = true;
+                curSwitcher = new Thread(SwitchCursors);
+                curSwitcher.IsBackground = true;
+                curSwitcher.Start();
+                while (runServer)
+                {
+                    stoper1.Reset();
+                    stoper1.Start();
+                    UnpackDTO();
+                    stoper1.Stop();
+                    dt = Convert.ToInt32(stoper1.ElapsedMilliseconds);
+                    Thread.Sleep(dt < timeWin + 1 ? timeWin - dt : 0);
+                }
+            }
+        }
+
+        public void StopServer()
+        {
+            lock (threadLock1) { this.switchCursors = false; }
+            lock (threadLock2) { this.runServer = false; }
+            if (curSwitcher != null && curSwitcher.IsAlive) curSwitcher.Join();
+        }
+
         private void SwitchCursors()
         {
-            this.switchCursors = true;
-            Point tmpMousePos;
-            Point secondCursorPos;
-            while (switchCursors)
+            if (!this.switchCursors)
             {
-                tmpMousePos = GetMousePosition();
-                lock (threadLock) { secondCursorPos = mCursor2Pos; }
-                SetCursorPos((int)mCursor2Pos.X, (int)mCursor2Pos.Y);
-                System.Threading.Thread.Sleep(timeWin);
-                SetCursorPos((int)tmpMousePos.X, (int)tmpMousePos.Y);
-                System.Threading.Thread.Sleep(timeWin);
+                this.switchCursors = true;
+                Point tmpMousePos;
+                Point secondCursorPos;
+                while (switchCursors)
+                {
+                    tmpMousePos = GetMousePosition();
+                    lock (threadLock1) { secondCursorPos = mCursor2Pos; }
+                    SetCursorPos((int)mCursor2Pos.X, (int)mCursor2Pos.Y);
+                    if (clickLMB)
+                    {
+                        mouse_event(MOUSEEVENT_K_LEFTDOWN, (uint)mCursor2Pos.X, (uint)mCursor2Pos.Y, 0, 0);
+                        mouse_event(MOUSEEVENT_K_LEFTUP, (uint)mCursor2Pos.X, (uint)mCursor2Pos.Y, 0, 0);
+                        lock (threadLock3) { this.clickLMB = false; }
+                    }
+                    if (clickRMB)
+                    {
+                        mouse_event(MOUSEEVENT_K_RIGHTDOWN, (uint)mCursor2Pos.X, (uint)mCursor2Pos.Y, 0, 0);
+                        mouse_event(MOUSEEVENT_K_RIGHTUP, (uint)mCursor2Pos.X, (uint)mCursor2Pos.Y, 0, 0);
+                        lock (threadLock3) { this.clickRMB = false; }
+                    }
+                    Thread.Sleep(timeWin);
+                    SetCursorPos((int)tmpMousePos.X, (int)tmpMousePos.Y);
+                    Thread.Sleep(timeWin);
+                }
             }
+        }
+
+        private void SendDTO(BinaryReader bReader, BinaryWriter bWriter, DTO dto)
+        {
+            stoper2.Reset();
+            stoper2.Start();
+            // Sending JSON via stream from TCPClientSocket:
+            try { bWriter.Write(dto.ReturnJSONString()); }
+            catch (IOException ex)
+            {
+                throw new TCHException(string.Format("Error occured while sending DTO.\n\nDetails:\n{0}", ex.Message));
+            }
+            try { if (!bReader.ReadBoolean()) throw new TCHException("False acknowledgement received from the server."); }
+            catch (Exception ex)
+            {
+                throw new TCHException(string.Format("Error occured while receiving acknowledgement DTO.\n\nDetails:\n{0}", ex.Message));
+            }
+            stoper2.Stop();
+            int dt = Convert.ToInt32(stoper2.ElapsedMilliseconds);
+            Thread.Sleep(dt < timeWin + 1 ? timeWin - dt : 0);
         }
 
         private void UnpackDTO()
         {
             if (bReader != null)
             {
-                stoper.Reset();
-                stoper.Start();
                 // Receiving JSON via stream from TCPClientSocket:
                 string tmp = "";
                 try { tmp = bReader.ReadString(); }
@@ -149,7 +198,9 @@ namespace MPCollab
                     throw new TCHException(string.Format("Error occured while sending DTO.\n\nDetails:\n{0}", ex.Message));
                 }
                 currentDiffs = tmp != "" ? JsonConvert.DeserializeObject<DTO>(tmp) : new DTO(0, 0);
-                lock (threadLock)
+
+                // Updating second cursor position in critical section:
+                lock (threadLock1)
                 {
                     mCursor2Pos.X += currentDiffs.DiffX;
                     mCursor2Pos.Y += currentDiffs.DiffY;
@@ -157,24 +208,15 @@ namespace MPCollab
 
                 // Mouse clicks handling:
                 if (currentDiffs.LPMClicked)
-                {
-                    mouse_event(MOUSEEVENT_K_LEFTDOWN, (uint)mCursor2Pos.X, (uint)mCursor2Pos.Y, 0, 0);
-                    mouse_event(MOUSEEVENT_K_LEFTUP, (uint)mCursor2Pos.X, (uint)mCursor2Pos.Y, 0, 0);
-                }
+                    lock (threadLock3) { this.clickLMB = true; }
                 if (currentDiffs.PPMClicked)
-                {
-                    mouse_event(MOUSEEVENT_K_RIGHTDOWN, (uint)mCursor2Pos.X, (uint)mCursor2Pos.Y, 0, 0);
-                    mouse_event(MOUSEEVENT_K_RIGHTUP, (uint)mCursor2Pos.X, (uint)mCursor2Pos.Y, 0, 0);
-                }
+                    lock (threadLock3) { this.clickRMB = true; }
 
                 // Sending acknowledgement:
                 try { bWriter.Write(true); }
                 catch (IOException ex) {
                     throw new TCHException(string.Format("Error occured while sending acknowledgement DTO.\n\nDetails:\n{0}", ex.Message));
                 }
-                stoper.Stop();
-                int dt = Convert.ToInt32(stoper.ElapsedMilliseconds);
-                System.Threading.Thread.Sleep(dt < timeWin + 1 ? timeWin - dt : 0);
             }
         }
 
@@ -201,6 +243,11 @@ namespace MPCollab
                     bWriter.Close();
                     bWriter.Dispose();
                     bWriter = null;
+                    if (curSwitcher != null && curSwitcher.IsAlive)
+                    {
+                        curSwitcher.Abort();
+                        curSwitcher = null;
+                    }
                 }
             }
             this.disposed = true;
