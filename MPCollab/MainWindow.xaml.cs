@@ -36,6 +36,8 @@ namespace MPCollab
 
         private bool hostOrClient; // true - host, false - client
 
+        //komentarz do testu
+
         public MainWindow()
         {
             InitializeComponent();
