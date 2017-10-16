@@ -20,8 +20,9 @@ namespace MPCollab
         private BinaryReader bReader;
         private BinaryWriter bWriter;
         private DTO currentDiffs;
-        private bool disposed, hostOrClient;
+        private bool disposed, switchCursors, hostOrClient;
         private int timeWin;
+        private object threadLock;
         private const int MOUSEEVENT_K_LEFTDOWN = 0x02;
         private const int MOUSEEVENT_K_LEFTUP = 0x04;
         private const int MOUSEEVENT_K_RIGHTDOWN = 0x08;
@@ -29,8 +30,11 @@ namespace MPCollab
 
         public TwoCursorsHandler(string ip, int timeWin, bool hostOrClient)
         {
+            this.disposed = false;
+            this.switchCursors = false;
             this.hostOrClient = hostOrClient;
             this.timeWin = timeWin;
+            this.threadLock = new object();
             this.stoper = new Stopwatch();
             //mCursor2Pos = PointToScreen(Mouse.GetPosition(this));
             mCursor2Pos = GetMousePosition();
@@ -116,7 +120,23 @@ namespace MPCollab
                 }
         }
 
-        public void UpdateCursorsPositions()
+        private void SwitchCursors()
+        {
+            this.switchCursors = true;
+            Point tmpMousePos;
+            Point secondCursorPos;
+            while (switchCursors)
+            {
+                tmpMousePos = GetMousePosition();
+                lock (threadLock) { secondCursorPos = mCursor2Pos; }
+                SetCursorPos((int)mCursor2Pos.X, (int)mCursor2Pos.Y);
+                System.Threading.Thread.Sleep(timeWin);
+                SetCursorPos((int)tmpMousePos.X, (int)tmpMousePos.Y);
+                System.Threading.Thread.Sleep(timeWin);
+            }
+        }
+
+        private void UnpackDTO()
         {
             if (bReader != null)
             {
@@ -129,10 +149,11 @@ namespace MPCollab
                     throw new TCHException(string.Format("Error occured while sending DTO.\n\nDetails:\n{0}", ex.Message));
                 }
                 currentDiffs = tmp != "" ? JsonConvert.DeserializeObject<DTO>(tmp) : new DTO(0, 0);
-                mCursor2Pos.X += currentDiffs.DiffX;
-                mCursor2Pos.Y += currentDiffs.DiffY;
-                Point tmpMousePos = GetMousePosition();
-                SetCursorPos((int)mCursor2Pos.X, (int)mCursor2Pos.Y);
+                lock (threadLock)
+                {
+                    mCursor2Pos.X += currentDiffs.DiffX;
+                    mCursor2Pos.Y += currentDiffs.DiffY;
+                }
 
                 // Mouse clicks handling:
                 if (currentDiffs.LPMClicked)
@@ -154,7 +175,6 @@ namespace MPCollab
                 stoper.Stop();
                 int dt = Convert.ToInt32(stoper.ElapsedMilliseconds);
                 System.Threading.Thread.Sleep(dt < timeWin + 1 ? timeWin - dt : 0);
-                SetCursorPos((int)tmpMousePos.X, (int)tmpMousePos.Y);
             }
         }
 
@@ -189,6 +209,7 @@ namespace MPCollab
         // Public area:
         public enum MButtons{ LMB, MMB, RMB };
 
+        [Serializable]
         public class TCHException : ApplicationException
         {
             public TCHException(string msg) : base(msg) { } 

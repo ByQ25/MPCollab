@@ -24,20 +24,13 @@ namespace MPCollab
     /// </summary>
     public partial class MainWindow : Window
     {
-        private Point mCursor2Pos, screenCenter;
-        private DispatcherTimer dTimer;
         private TwoCursorsHandler TCH;
-        private DTO currentDiffs;
         private bool hostOrClient; // true - host, false - client
         private static int timeWin = 17;
 
         public MainWindow()
         {
             InitializeComponent();
-
-            dTimer = new DispatcherTimer();
-            dTimer.Interval = new TimeSpan(0, 0, 0, 0, timeWin);
-            dTimer.Tick += dTimer_Tick;
 
             //Dodanie skrótu i przypisanej metody
             RoutedCommand newCmd = new RoutedCommand();
@@ -62,7 +55,6 @@ namespace MPCollab
             hostOrClient = true;
             TCH = new TwoCursorsHandler(textBox.Text, timeWin, hostOrClient);
             MessageBox.Show("Połączenie nawiązane.");
-            dTimer.Start();
         }
 
         private void ClientSideProcedure()
@@ -74,19 +66,11 @@ namespace MPCollab
 
         private void RestoreAppToInitialState()
         {
-            dTimer.Stop();
             TCH.Dispose();
             Mouse.OverrideCursor = Cursors.Arrow;
         }
 
         // Events handling:
-        private void dTimer_Tick(object sender, EventArgs e)
-        {
-            dTimer.Stop();
-            TCH.UpdateCursorsPositions();
-            dTimer.Start();
-        }
-
         private void MainWin_KeyDown(object sender, KeyEventArgs e)
         {
             switch(e.Key)
@@ -109,7 +93,7 @@ namespace MPCollab
 
         private void MainWin_MouseMove(object sender, MouseEventArgs e)
         {
-            TCH.HandleMouseMove();
+            if (TCH != null) TCH.HandleMouseMove();
         }
 
         private void MainWin_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
