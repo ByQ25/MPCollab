@@ -34,7 +34,7 @@ namespace MPCollab
             RoutedCommand newCmd = new RoutedCommand();
             newCmd.InputGestures.Add(new KeyGesture(System.Windows.Input.Key.S, ModifierKeys.Control));
             CommandBindings.Add(new CommandBinding(newCmd, ControlSExecuted));
-
+            
             try { this.textBox.Text = GetLocalIPAddress(); }
             catch (ApplicationException) { }
         }
@@ -54,6 +54,8 @@ namespace MPCollab
             if (TCH == null) TCH = new TwoCursorsHandler(textBox.Text, timeWin, hostOrClient);
             TCH.StartServer();
             bottomLabel.Content = "Połączenie zosało nawiązane.";
+            StartBlinking((Komputer)vb1.Child,(Komputer)vb2.Child);
+            
         }
 
         private void ClientSideProcedure()
@@ -113,6 +115,11 @@ namespace MPCollab
         private void ControlSExecuted(object sender, ExecutedRoutedEventArgs e)
         {
             System.Windows.MessageBox.Show("Wow, działa");
+        }
+        private void StartBlinking(Komputer com1, Komputer com2)
+        {
+            com1.Start();
+            com2.Start();
         }
     }
 }

@@ -13,14 +13,14 @@
         <Button x:Name="buttonHost" Content="Hostuj" HorizontalAlignment="Left" Margin="40,264,0,0" VerticalAlignment="Top" Width="75" Click="buttonHost_Click"/>
         <Button x:Name="buttonClient" Content="Połącz" HorizontalAlignment="Left" Margin="141,264,0,0" VerticalAlignment="Top" Width="75" Click="buttonClient_Click"/>
         <TextBox x:Name="textBox_Copy" HorizontalAlignment="Left" Height="23" Margin="260,50,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="100"/>
-        <Viewbox StretchDirection="Both" Stretch="Uniform" Margin="40,57,377,162" Height="100" Width="100">
-            <custom:Komputer/>
+        <Viewbox x:Name="vb1" StretchDirection="Both" Stretch="Uniform" Margin="40,57,377,162" Height="100" Width="100">
+            <custom:Komputer x:Name="computer1"/>
         </Viewbox>
-        <Viewbox StretchDirection="Both" Stretch="Uniform" Margin="260,57,157,162" Height="100" Width="100">
-            <custom:Komputer/>
+        <Viewbox x:Name="vb3" StretchDirection="Both" Stretch="Uniform" Margin="260,57,157,162" Height="100" Width="100">
+            <custom:Komputer x:Name="computer2"/>
         </Viewbox>
-        <Viewbox StretchDirection="Both" Stretch="Uniform" Margin="150,57,267,162" Height="100" Width="100">
-            <custom:Komputer/>
+        <Viewbox x:Name="vb2" StretchDirection="Both" Stretch="Uniform" Margin="150,57,267,162" Height="100" Width="100">
+            <custom:Komputer x:Name="hostComputer"/>
         </Viewbox>
         <Label x:Name="bottomLabel" Content="Najlepszy label ever." HorizontalAlignment="Left" Margin="280,264,0,0" VerticalAlignment="Top" Width="184"/>
     </Grid>
