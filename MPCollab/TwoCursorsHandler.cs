@@ -105,8 +105,8 @@ namespace MPCollab
             if (clientSocket != null && clientSocket.Connected && !hostOrClient)
                 switch (mb)
                 {
-                    case MButtons.LMB: SendDTO(bReader, bWriter, new DTO(0, 0, 1, 0)); break;
-                    case MButtons.RMB: SendDTO(bReader, bWriter, new DTO(0, 0, 0, 1)); break;
+                    case MButtons.LMB: SendDTO(bReader, bWriter, new DTO(0, 0, true, false)); break;
+                    case MButtons.RMB: SendDTO(bReader, bWriter, new DTO(0, 0, false, true)); break;
                 }
         }
 
@@ -183,8 +183,8 @@ namespace MPCollab
         {
             stoper2.Reset();
             stoper2.Start();
-            // Sending JSON via stream from TCPClientSocket:
-            bWriter.Write(dto.ReturnJSONString());
+            // Sending PSON via stream from TCPClientSocket:
+            bWriter.Write(dto.SerializePSONString());
             if (!bReader.ReadBoolean()) throw new TCHException("False acknowledgement received from the server.");
             stoper2.Stop();
             int dt = Convert.ToInt32(stoper2.ElapsedMilliseconds);
@@ -208,9 +208,9 @@ namespace MPCollab
                 }
 
                 // Mouse clicks handling:
-                if (currentDiffs.LPMClicked > 0)
+                if (currentDiffs.LPMClicked)
                     lock (threadLock3) { this.clickLMB = true; }
-                if (currentDiffs.PPMClicked > 0)
+                if (currentDiffs.PPMClicked)
                     lock (threadLock3) { this.clickRMB = true; }
 
                 // Sending acknowledgement:
