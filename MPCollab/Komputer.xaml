@@ -4,19 +4,18 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:MPCollab"
-             mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="300">
+             mc:Ignorable="d" Width="237" Height="156">
     <Grid>
-        <Rectangle Fill="LightBlue" Opacity="1" HorizontalAlignment="Left" Height="80" Margin="91,32,0,0" Stroke="LightBlue" VerticalAlignment="Top" Width="138" RadiusX="20" RadiusY="20"/>
-        <Rectangle x:Name="rect1" Fill="#FFA500" Opacity="1" HorizontalAlignment="Left" Height="72" Margin="96,36,0,0" Stroke="#FFA500" VerticalAlignment="Top" Width="128" RadiusX="20" RadiusY="20"/>
-        <Rectangle Fill="LightBlue" HorizontalAlignment="Left" Height="8" Margin="126,115,0,0" RadiusY="7" RadiusX="7" Stroke="#FFFFFF" VerticalAlignment="Top" Width="68"/>
-        <Rectangle Fill="LightBlue" HorizontalAlignment="Left" Height="50" Margin="6,58,0,0" RadiusY="0" RadiusX="0" Stroke="LightBlue" VerticalAlignment="Top" Width="56"/>
-        <Rectangle Fill="LightBlue" HorizontalAlignment="Left" Height="68" Margin="6,26,0,0" RadiusY="17" RadiusX="17" Stroke="LightBlue" VerticalAlignment="Top" Width="56"/>
+        <Rectangle Fill="LightBlue" Opacity="1" HorizontalAlignment="Left" Height="69" Margin="80,31,0,0" Stroke="LightBlue" VerticalAlignment="Top" Width="119" RadiusX="20" RadiusY="20"/>
+        <Rectangle x:Name="rect1" Fill="#FFA500" Opacity="1" HorizontalAlignment="Left" Height="62" Margin="84,35,0,0" Stroke="#FFA500" VerticalAlignment="Top" Width="111" RadiusX="20" RadiusY="20"/>
+        <Rectangle Fill="LightBlue" HorizontalAlignment="Left" Height="7" Margin="110,103,0,0" RadiusY="7" RadiusX="7" Stroke="#FFFFFF" VerticalAlignment="Top" Width="59"/>
+        <Rectangle Fill="LightBlue" HorizontalAlignment="Left" Height="43" Margin="6,54,0,0" RadiusY="0" RadiusX="0" Stroke="LightBlue" VerticalAlignment="Top" Width="48"/>
+        <Rectangle Fill="LightBlue" HorizontalAlignment="Left" Height="59" Margin="6,26,0,0" RadiusY="17" RadiusX="17" Stroke="LightBlue" VerticalAlignment="Top" Width="48"/>
 
-        <Rectangle Fill="LightBlue" HorizontalAlignment="Left" Height="17" Margin="6,111,0,0" RadiusY="0" RadiusX="0" Stroke="LightBlue" VerticalAlignment="Top" Width="56"/>
-        <Rectangle Fill="LightBlue" HorizontalAlignment="Left" Height="14" Margin="6,122,0,0" RadiusY="7" RadiusX="7" Stroke="LightBlue" VerticalAlignment="Top" Width="56"/>
-        <Rectangle Fill="White" HorizontalAlignment="Left" Height="7" Margin="9,43,0,0" RadiusY="3" RadiusX="3" Stroke="White" VerticalAlignment="Top" Width="50"/>
-        <Rectangle Fill="White" HorizontalAlignment="Left" Height="7" Margin="9,56,0,0" RadiusY="3" RadiusX="3" Stroke="White" VerticalAlignment="Top" Width="50"/>
+        <Rectangle Fill="LightBlue" HorizontalAlignment="Left" Height="14" Margin="6,100,0,0" RadiusY="0" RadiusX="0" Stroke="LightBlue" VerticalAlignment="Top" Width="48"/>
+        <Rectangle Fill="LightBlue" HorizontalAlignment="Left" Height="12" Margin="6,109,0,0" RadiusY="7" RadiusX="7" Stroke="LightBlue" VerticalAlignment="Top" Width="48"/>
+        <Rectangle Fill="White" HorizontalAlignment="Left" Height="6" Margin="9,41,0,0" RadiusY="3" RadiusX="3" Stroke="White" VerticalAlignment="Top" Width="43"/>
+        <Rectangle Fill="White" HorizontalAlignment="Left" Height="6" Margin="9,52,0,0" RadiusY="3" RadiusX="3" Stroke="White" VerticalAlignment="Top" Width="43"/>
 
     </Grid>
 </UserControl>

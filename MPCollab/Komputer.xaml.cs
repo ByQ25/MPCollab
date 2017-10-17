@@ -20,35 +20,51 @@ namespace MPCollab
     /// </summary>
     public partial class Komputer : UserControl
     {
-        private double speed;
+        private bool OrangeOrWhite;
+        System.Windows.Threading.DispatcherTimer dispatcherTimer = new System.Windows.Threading.DispatcherTimer();
         public Komputer()
         {
             InitializeComponent();
-            speed = 0.1;
+
+            rect1.Fill = new SolidColorBrush(Colors.White);
+            //System.Windows.Threading.DispatcherTimer dispatcherTimer = new System.Windows.Threading.DispatcherTimer();
+            dispatcherTimer.Tick += new EventHandler(dispatcherTimer_Tick);
+            dispatcherTimer.Interval = new TimeSpan(0, 0, 1);
+            
+            
         }
 
         private void Rectangle_Loaded(object sender, RoutedEventArgs e)
         {
-            test();
+            
         }
-        System.Windows.Threading.DispatcherTimer dispatcherTimer = new System.Windows.Threading.DispatcherTimer();
-        private void test()
+        
+        public void Start()
         {
-            dispatcherTimer.Tick += new EventHandler(dispatcherTimer_Tick);
-            dispatcherTimer.Interval = new TimeSpan(0, 0, 1);
             dispatcherTimer.Start();
+            OrangeOrWhite = false;
+
+        }
+        public void Stop()
+        {
+            dispatcherTimer.Stop();
+            rect1.Fill = new SolidColorBrush(Colors.White);
         }
         private void dispatcherTimer_Tick(object sender, EventArgs e)
         {
-            if (rect1.Opacity==1)
+
+            if (OrangeOrWhite)
             {
-                speed = -speed;
+                rect1.Fill = new SolidColorBrush(Colors.Orange);
+                OrangeOrWhite = false;
             }
-            if (rect1.Opacity==0)
+            else
             {
-                speed = -speed;
+                rect1.Fill = new SolidColorBrush(Colors.White);
+                OrangeOrWhite = true;
             }
-            rect1.Opacity += speed;            
+            
+            
         }
 
     }
