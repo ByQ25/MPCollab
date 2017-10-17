@@ -39,6 +39,16 @@ namespace MPCollab
             return new DTO(diffX, diffY, clickLPM, clickPPM);
         }
 
+        public static DTO DeserializeDTOObject(string input)
+        {
+            string[] args = input.Split(';');
+            int diffX = Convert.ToInt32(args[0]);
+            int diffY = Convert.ToInt32(args[1]);
+            bool clickLPM = Convert.ToBoolean(args[2]);
+            bool clickPPM = Convert.ToBoolean(args[3]);
+            return new DTO(diffX, diffY, clickLPM, clickPPM);
+        }
+
         public string SerializePSONString()
         {
             return string.Format("{0};{1};{2};{3}", diffX, diffY, clickLPM, clickPPM);

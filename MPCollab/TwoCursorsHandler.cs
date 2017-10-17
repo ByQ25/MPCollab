@@ -198,7 +198,7 @@ namespace MPCollab
                 // Receiving JSON via stream from TCPClientSocket:
                 string tmp = "";
                 tmp = bReader.ReadString();
-                currentDiffs = tmp != "" ? JsonConvert.DeserializeObject<DTO>(tmp) : new DTO(0, 0);
+                currentDiffs = tmp != "" ? DTO.DeserializeDTOObject(tmp) : new DTO(0, 0);
 
                 // Updating second cursor position in critical section:
                 lock (threadLock1)
