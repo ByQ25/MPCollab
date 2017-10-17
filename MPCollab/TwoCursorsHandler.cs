@@ -33,9 +33,11 @@ namespace MPCollab
         public TwoCursorsHandler(string ip, int timeWin, bool hostOrClient)
         {
             this.disposed = false;
+            this.runServer = false;
             this.switchCursors = false;
-            this.runServer = true;
             this.hostOrClient = hostOrClient;
+            this.clickLMB = false;
+            this.clickRMB = false;
             this.timeWin = timeWin;
             this.threadLock1 = new object();
             this.threadLock2 = new object();
