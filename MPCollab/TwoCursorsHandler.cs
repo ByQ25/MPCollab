@@ -95,6 +95,7 @@ namespace MPCollab
                 currentDiffs = new DTO((int)(mouseP.X - screenCenter.X), (int)(mouseP.Y - screenCenter.Y));
                 // Sending JSON via stream from TCPClientSocket:
                 SendDTO(bReader, bWriter, currentDiffs);
+                SetCursorPos((int)screenCenter.X, (int)screenCenter.Y);
             }
         }
 
