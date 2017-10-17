@@ -6,9 +6,7 @@ using System.Net.Sockets;
 using System.Windows;
 using System.Diagnostics;
 using System.Threading;
-using System.Windows.Threading;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 
 namespace MPCollab
 {
@@ -20,10 +18,10 @@ namespace MPCollab
         private TcpClient clientSocket;
         private BinaryReader bReader;
         private BinaryWriter bWriter;
-        private Thread curSwitcher;
+        private Thread curSwitcher, serverRunner;
         private DTO currentDiffs;
-        private bool disposed, runServer, switchCursors, hostOrClient, clickLMB, clickRMB;
         private int timeWin;
+        private bool disposed, runServer, switchCursors, hostOrClient, clickLMB, clickRMB;
         private object threadLock1, threadLock2, threadLock3;
         private const int MOUSEEVENT_K_LEFTDOWN = 0x02;
         private const int MOUSEEVENT_K_LEFTUP = 0x04;
@@ -32,13 +30,13 @@ namespace MPCollab
 
         public TwoCursorsHandler(string ip, int timeWin, bool hostOrClient)
         {
+            this.timeWin = timeWin;
             this.disposed = false;
             this.runServer = false;
             this.switchCursors = false;
             this.hostOrClient = hostOrClient;
             this.clickLMB = false;
             this.clickRMB = false;
-            this.timeWin = timeWin;
             this.threadLock1 = new object();
             this.threadLock2 = new object();
             this.threadLock3 = new object();
@@ -95,8 +93,9 @@ namespace MPCollab
             {
                 Point mouseP = GetMousePosition();
                 currentDiffs = new DTO((int)(mouseP.X - screenCenter.X), (int)(mouseP.Y - screenCenter.Y));
-                // Sending JSON via stream from TCPClientSocket:
-                SendDTO(bReader, bWriter, currentDiffs);
+                // Sending JSON via stream in TCPClientSocket:
+                try { SendDTO(bReader, bWriter, currentDiffs); }
+                catch { }
                 SetCursorPos((int)screenCenter.X, (int)screenCenter.Y);
             }
         }
@@ -111,24 +110,33 @@ namespace MPCollab
                 }
         }
 
+        // Entry point for GUI or other calling class:
         public void StartServer()
         {
             if (!this.runServer)
             {
-                int dt;
-                this.runServer = true;
                 curSwitcher = new Thread(SwitchCursors);
                 curSwitcher.IsBackground = true;
                 curSwitcher.Start();
-                while (runServer)
-                {
-                    stoper1.Reset();
-                    stoper1.Start();
-                    UnpackDTO();
-                    stoper1.Stop();
-                    dt = Convert.ToInt32(stoper1.ElapsedMilliseconds);
-                    Thread.Sleep(dt < timeWin + 1 ? timeWin - dt : 0);
-                }
+                serverRunner = new Thread(RunServer);
+                serverRunner.IsBackground = true;
+                serverRunner.Start();
+            }
+        }
+
+        private void RunServer()
+        {
+            int dt;
+            this.runServer = true;
+            while (runServer)
+            {
+                stoper1.Reset();
+                stoper1.Start();
+                try { UnpackDTO(); }
+                catch { StopServer(); }
+                stoper1.Stop();
+                dt = Convert.ToInt32(stoper1.ElapsedMilliseconds);
+                Thread.Sleep(dt < timeWin + 1 ? timeWin - dt : 0);
             }
         }
 
@@ -137,6 +145,7 @@ namespace MPCollab
             lock (threadLock1) { this.switchCursors = false; }
             lock (threadLock2) { this.runServer = false; }
             if (curSwitcher != null && curSwitcher.IsAlive) curSwitcher.Join();
+            if (serverRunner != null && serverRunner.IsAlive) serverRunner.Abort();
         }
 
         private void SwitchCursors()
@@ -175,16 +184,8 @@ namespace MPCollab
             stoper2.Reset();
             stoper2.Start();
             // Sending JSON via stream from TCPClientSocket:
-            try { bWriter.Write(dto.ReturnJSONString()); }
-            catch (IOException ex)
-            {
-                throw new TCHException(string.Format("Error occured while sending DTO.\n\nDetails:\n{0}", ex.Message));
-            }
-            try { if (!bReader.ReadBoolean()) throw new TCHException("False acknowledgement received from the server."); }
-            catch (Exception ex)
-            {
-                throw new TCHException(string.Format("Error occured while receiving acknowledgement DTO.\n\nDetails:\n{0}", ex.Message));
-            }
+            bWriter.Write(dto.ReturnJSONString());
+            if (!bReader.ReadBoolean()) throw new TCHException("False acknowledgement received from the server.");
             stoper2.Stop();
             int dt = Convert.ToInt32(stoper2.ElapsedMilliseconds);
             Thread.Sleep(dt < timeWin + 1 ? timeWin - dt : 0);
@@ -196,10 +197,7 @@ namespace MPCollab
             {
                 // Receiving JSON via stream from TCPClientSocket:
                 string tmp = "";
-                try { tmp = bReader.ReadString(); }
-                catch (Exception ex) {
-                    throw new TCHException(string.Format("Error occured while sending DTO.\n\nDetails:\n{0}", ex.Message));
-                }
+                tmp = bReader.ReadString();
                 currentDiffs = tmp != "" ? JsonConvert.DeserializeObject<DTO>(tmp) : new DTO(0, 0);
 
                 // Updating second cursor position in critical section:
@@ -216,10 +214,7 @@ namespace MPCollab
                     lock (threadLock3) { this.clickRMB = true; }
 
                 // Sending acknowledgement:
-                try { bWriter.Write(true); }
-                catch (IOException ex) {
-                    throw new TCHException(string.Format("Error occured while sending acknowledgement DTO.\n\nDetails:\n{0}", ex.Message));
-                }
+                bWriter.Write(true);
             }
         }
 
@@ -238,8 +233,11 @@ namespace MPCollab
                 {
                     clientSocket.Close();
                     clientSocket = null;
-                    serverSocket.Stop();
-                    serverSocket = null;
+                    if (serverSocket != null)
+                    {
+                        serverSocket.Stop();
+                        serverSocket = null;
+                    }
                     bReader.Close();
                     bReader.Dispose();
                     bReader = null;
@@ -250,6 +248,11 @@ namespace MPCollab
                     {
                         curSwitcher.Abort();
                         curSwitcher = null;
+                    }
+                    if (serverRunner != null && serverRunner.IsAlive)
+                    {
+                        serverRunner.Abort();
+                        serverRunner = null;
                     }
                 }
             }
