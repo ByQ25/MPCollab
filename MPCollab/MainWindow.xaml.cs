@@ -74,6 +74,8 @@ namespace MPCollab
                 TCH = null;
             }
             Mouse.OverrideCursor = Cursors.Arrow;
+            StopBlinking((Komputer)vb1.Child, (Komputer)vb2.Child);
+            bottomLabel.Content = "Połączenie zosało zakończone.";
         }
 
         // Events handling:
@@ -120,6 +122,11 @@ namespace MPCollab
         {
             com1.Start();
             com2.Start();
+        }
+        private void StopBlinking(Komputer com1, Komputer com2)
+        {
+            com1.Stop();
+            com2.Stop();
         }
     }
 }
