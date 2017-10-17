@@ -105,8 +105,8 @@ namespace MPCollab
             if (clientSocket != null && clientSocket.Connected && !hostOrClient)
                 switch (mb)
                 {
-                    case MButtons.LMB: SendDTO(bReader, bWriter, new DTO(0, 0, true, false)); break;
-                    case MButtons.RMB: SendDTO(bReader, bWriter, new DTO(0, 0, false, true)); break;
+                    case MButtons.LMB: SendDTO(bReader, bWriter, new DTO(0, 0, 1, 0)); break;
+                    case MButtons.RMB: SendDTO(bReader, bWriter, new DTO(0, 0, 0, 1)); break;
                 }
         }
 
@@ -208,9 +208,9 @@ namespace MPCollab
                 }
 
                 // Mouse clicks handling:
-                if (currentDiffs.LPMClicked)
+                if (currentDiffs.LPMClicked > 0)
                     lock (threadLock3) { this.clickLMB = true; }
-                if (currentDiffs.PPMClicked)
+                if (currentDiffs.PPMClicked > 0)
                     lock (threadLock3) { this.clickRMB = true; }
 
                 // Sending acknowledgement:

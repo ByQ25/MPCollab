@@ -6,24 +6,24 @@ namespace MPCollab
     {
         // Fields:
         private int diffX, diffY;
-        private bool clickLPM, clickPPM;
+        private byte clickLPM, clickPPM;
 
         // Constructors:
         [JsonConstructor]
-        public DTO(int diffX, int diffY, bool clickLPM, bool clickPPM)
+        public DTO(int diffX, int diffY, byte clickLPM, byte clickPPM)
         {
             this.diffX = diffX;
             this.diffY = diffY;
             this.clickLPM = clickLPM;
             this.clickPPM = clickPPM;
         }
-        public DTO(int diffX, int diffY) : this(diffX, diffY, false, false) { }
+        public DTO(int diffX, int diffY) : this(diffX, diffY, 0, 0) { }
 
         // Properties:
         public int DiffX { get { return diffX; } }
         public int DiffY { get { return diffY; } }
-        public bool LPMClicked { get { return clickLPM; } }
-        public bool PPMClicked { get { return clickPPM; } }
+        public byte LPMClicked { get { return clickLPM; } }
+        public byte PPMClicked { get { return clickPPM; } }
 
         public string ReturnJSONString()
         {

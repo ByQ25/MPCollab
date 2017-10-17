@@ -51,16 +51,16 @@ namespace MPCollab
         private void ServerSideProcedure()
         {
             hostOrClient = true;
-            TCH = new TwoCursorsHandler(textBox.Text, timeWin, hostOrClient);
+            if (TCH == null) TCH = new TwoCursorsHandler(textBox.Text, timeWin, hostOrClient);
             TCH.StartServer();
-            MessageBox.Show("Połączenie nawiązane.");
+            bottomLabel.Content = "Połączenie zosało nawiązane.";
         }
 
         private void ClientSideProcedure()
         {
             hostOrClient = false;
             Mouse.OverrideCursor = Cursors.None;
-            TCH = new TwoCursorsHandler(textBox.Text, timeWin, hostOrClient);
+            if (TCH == null) TCH = new TwoCursorsHandler(textBox.Text, timeWin, hostOrClient);
         }
 
         private void RestoreAppToInitialState()
@@ -69,6 +69,7 @@ namespace MPCollab
             {
                 TCH.StopServer();
                 TCH.Dispose();
+                TCH = null;
             }
             Mouse.OverrideCursor = Cursors.Arrow;
         }

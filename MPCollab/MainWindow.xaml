@@ -22,6 +22,6 @@
         <Viewbox StretchDirection="Both" Stretch="Uniform" Margin="150,57,267,162" Height="100" Width="100">
             <custom:Komputer/>
         </Viewbox>
-        <Label Content="Najlepszy label ever." HorizontalAlignment="Left" Margin="280,264,0,0" VerticalAlignment="Top" Width="184"/>
+        <Label x:Name="bottomLabel" Content="Najlepszy label ever." HorizontalAlignment="Left" Margin="280,264,0,0" VerticalAlignment="Top" Width="184"/>
     </Grid>
 </Window>
