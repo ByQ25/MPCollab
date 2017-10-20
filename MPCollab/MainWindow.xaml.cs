@@ -118,11 +118,13 @@ namespace MPCollab
         {
             System.Windows.MessageBox.Show("Wow, działa");
         }
+
         private void StartBlinking(Komputer com1, Komputer com2)
         {
             com1.Start();
             com2.Start();
         }
+
         private void StopBlinking(Komputer com1, Komputer com2)
         {
             com1.Stop();
