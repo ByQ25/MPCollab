@@ -63,6 +63,7 @@ namespace MPCollab
             hostOrClient = false;
             Mouse.OverrideCursor = Cursors.None;
             if (TCH == null) TCH = new TwoCursorsHandler(textBox.Text, timeWin, hostOrClient);
+            StartBlinking((Komputer)vb1.Child, (Komputer)vb2.Child);
         }
 
         private void RestoreAppToInitialState()
