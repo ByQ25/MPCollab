@@ -25,8 +25,8 @@ namespace MPCollab
         public DTOext(uint type, string clipboardData) : this(false, false, type, clipboardData) { }
 
         // Properties:
-        public bool Copy { get { return copy; } }
-        public bool Paste { get { return paste; } }
+        public bool Copied { get { return copy; } }
+        public bool Pasted { get { return paste; } }
         public uint Type { get { return type; } }
         public string ClipboardData { get { return clipboardData; } }
 
@@ -35,12 +35,12 @@ namespace MPCollab
             return string.Format("{0};{1};{2};{3}", copy, paste, type, clipboardData); ;
         }
 
-        public static DTOext DeserializeDTOextToObject(string copy, string paste, string type, string clipboardData)
+        public static DTOext DeserializeDTOextObject(string copy, string paste, string type, string clipboardData)
         {
             return new DTOext(Convert.ToBoolean(copy), Convert.ToBoolean(paste), Convert.ToUInt32(type), clipboardData);
         }
 
-        public static DTOext DeserializeDTOextToObject(string input)
+        public static DTOext DeserializeDTOextObject(string input)
         {
             string[] tmpT = input.Split(';');
             bool copy, paste;

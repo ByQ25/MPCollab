@@ -73,6 +73,7 @@
       <DependentUpon>Komputer.xaml</DependentUpon>
     </Compile>
     <Compile Include="TwoCursorsHandler.cs" />
+    <Compile Include="TwoCursorsHandlerWithClipboard.cs" />
     <Page Include="Komputer.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
