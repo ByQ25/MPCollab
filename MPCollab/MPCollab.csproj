@@ -67,6 +67,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="DTOext.cs" />
     <Compile Include="DTO_old.cs" />
     <Compile Include="Komputer.xaml.cs">
       <DependentUpon>Komputer.xaml</DependentUpon>

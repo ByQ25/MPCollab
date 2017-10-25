@@ -35,6 +35,7 @@ namespace MPCollab
             newCmd.InputGestures.Add(new KeyGesture(System.Windows.Input.Key.S, ModifierKeys.Control));
             CommandBindings.Add(new CommandBinding(newCmd, ControlSExecuted));
             
+
             try { this.textBox.Text = GetLocalIPAddress(); }
             catch (ApplicationException) { }
         }
@@ -117,7 +118,8 @@ namespace MPCollab
 
         private void ControlSExecuted(object sender, ExecutedRoutedEventArgs e)
         {
-            System.Windows.MessageBox.Show("Wow, działa");
+            System.Windows.MessageBox.Show(Clipboard.GetData(DataFormats.FileDrop).ToString());
+            
         }
 
         private void StartBlinking(Komputer com1, Komputer com2)
