@@ -242,7 +242,8 @@ namespace MPCollab
                     }
                     if (copy)
                     {
-                        
+                        string data = GetData();
+                        //Add to client's clipboard
                     }
                     if (paste)
                     {
@@ -381,6 +382,36 @@ namespace MPCollab
             }
             this.disposed = true;
         }
+        public string GetData()
+        {
+
+            string data = null;
+            
+            if (clipboard.Type == 0) //Text
+            {
+                if (!IsClipboardFormatAvailable(CF_UNICODETEXT))
+                    return null;
+                if (!OpenClipboard(IntPtr.Zero))
+                    return null;
+
+                
+                var hGlobal = GetClipboardData(CF_UNICODETEXT);
+                if (hGlobal != IntPtr.Zero)
+                {
+                    var lpwcstr = GlobalLock(hGlobal);
+                    if (lpwcstr != IntPtr.Zero)
+                    {
+                        data = Marshal.PtrToStringUni(lpwcstr);
+                        GlobalUnlock(lpwcstr);
+                    }
+                }
+                CloseClipboard();
+            }
+            
+
+            return data;
+        }
+
 
         // Public area:
         public enum MButtons { LMB, MMB, RMB };
