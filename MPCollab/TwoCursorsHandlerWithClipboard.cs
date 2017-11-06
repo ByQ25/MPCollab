@@ -242,11 +242,11 @@ namespace MPCollab
                     }
                     if (copy)
                     {
-
+                        
                     }
                     if (paste)
                     {
-
+                        Clipboard.SetText(clipboard.ClipboardData);
                     }
                     Thread.Sleep(timeWin);
                     SetCursorPos((int)tmpMousePos.X, (int)tmpMousePos.Y);
