@@ -16,6 +16,7 @@ namespace MPCollab
     //Na razie na to nie patrz xD
     class TwoCursorsHandlerWithClipboard
     {
+       
         private Point mCursor2Pos, screenCenter;
         private Stopwatch stoper1, stoper2, stoper3, stoper4;
         private TcpListener serverSocket, serverSocketClipboard;
@@ -63,6 +64,7 @@ namespace MPCollab
             this.threadLock5 = new object();
             this.stoper1 = new Stopwatch();
             this.stoper2 = new Stopwatch();
+            
             //mCursor2Pos = PointToScreen(Mouse.GetPosition(this));
             mCursor2Pos = GetMousePosition();
             screenCenter = new Point((int)SystemParameters.PrimaryScreenWidth / 2, (int)SystemParameters.PrimaryScreenHeight / 2);
