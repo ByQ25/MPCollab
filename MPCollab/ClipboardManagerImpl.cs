@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,7 +20,9 @@ namespace MPCollab
         {
             if (Clipboard.ContainsAudio())
             {
-                clipboardTmp.SetAudio(Clipboard.GetAudioStream());
+                MemoryStream tmp = new MemoryStream();
+                Clipboard.GetAudioStream().CopyToAsync(tmp);
+                clipboardTmp.SetAudio(tmp);   
             }
             if (Clipboard.ContainsFileDropList())
             {
