@@ -20,10 +20,10 @@ namespace MPCollab
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : Window, IDisposable
     {
         private TwoCursorsHandler TCH;
-        private bool hostOrClient; // true - host, false - client
+        private bool disposed, hostOrClient; // true - host, false - client
         private static int timeWin = 17;
 
         public MainWindow()
@@ -34,7 +34,7 @@ namespace MPCollab
             RoutedCommand newCmd = new RoutedCommand();
             newCmd.InputGestures.Add(new KeyGesture(System.Windows.Input.Key.S, ModifierKeys.Control));
             CommandBindings.Add(new CommandBinding(newCmd, ControlSExecuted));
-            
+            disposed = false;
 
             try { this.textBox.Text = GetLocalIPAddress(); }
             catch (ApplicationException) { }
@@ -132,6 +132,20 @@ namespace MPCollab
         {
             com1.Stop();
             com2.Stop();
+        }
+
+
+        // IDisposable implementation:
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!this.disposed && disposing) TCH.Dispose();
+            this.disposed = true;
         }
     }
 }

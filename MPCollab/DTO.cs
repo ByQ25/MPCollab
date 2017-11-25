@@ -1,9 +1,10 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
+using System.Runtime.Serialization;
 
 namespace MPCollab
 {
-    public struct DTO
+    [Serializable]
+    public struct DTO : ISerializable
     {
         // Fields:
         private int diffX, diffY;
@@ -18,6 +19,11 @@ namespace MPCollab
             this.clickPPM = clickPPM;
         }
         public DTO(int diffX, int diffY) : this(diffX, diffY, false, false) { }
+        private DTO(SerializationInfo info, StreamingContext context) :
+            this(info.GetInt32("DiffX"),
+                info.GetInt32("DiffY"),
+                info.GetBoolean("LPMClicked"),
+                info.GetBoolean("PPMClicked")) { }
 
         // Properties:
         public int DiffX { get { return diffX; } }
@@ -25,33 +31,13 @@ namespace MPCollab
         public bool LPMClicked { get { return clickLPM; } }
         public bool PPMClicked { get { return clickPPM; } }
 
-        public static DTO DeserializeDTOObject(int diffX, int diffY, bool clickLPM, bool clickPPM)
+        // ISerializable implementation:
+        public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            return new DTO(diffX, diffY, clickLPM, clickPPM);
-        }
-
-        public static DTO DeserializeDTOObject(string diffXS, string diffYS, string clickLPMS, string clickPPMS)
-        {
-            int diffX = Convert.ToInt32(diffXS);
-            int diffY = Convert.ToInt32(diffYS);
-            bool clickLPM = Convert.ToBoolean(clickLPMS);
-            bool clickPPM = Convert.ToBoolean(clickPPMS);
-            return new DTO(diffX, diffY, clickLPM, clickPPM);
-        }
-
-        public static DTO DeserializeDTOObject(string input)
-        {
-            string[] args = input.Split(';');
-            int diffX = Convert.ToInt32(args[0]);
-            int diffY = Convert.ToInt32(args[1]);
-            bool clickLPM = Convert.ToBoolean(args[2]);
-            bool clickPPM = Convert.ToBoolean(args[3]);
-            return new DTO(diffX, diffY, clickLPM, clickPPM);
-        }
-
-        public string SerializePSONString()
-        {
-            return string.Format("{0};{1};{2};{3}", diffX, diffY, clickLPM, clickPPM);
+            info.AddValue("DiffX", diffX);
+            info.AddValue("DiffY", diffX);
+            info.AddValue("LPMClicked", clickLPM);
+            info.AddValue("PPMClicked", clickPPM);
         }
     }
 }

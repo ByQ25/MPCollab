@@ -69,13 +69,12 @@
     </ApplicationDefinition>
     <Compile Include="ClipboardManagerImpl.cs" />
     <Compile Include="DTOext.cs" />
-    <Compile Include="DTO_old.cs" />
     <Compile Include="IClipboardManager.cs" />
     <Compile Include="Komputer.xaml.cs">
       <DependentUpon>Komputer.xaml</DependentUpon>
     </Compile>
+    <Compile Include="NativeMethods.cs" />
     <Compile Include="TwoCursorsHandler.cs" />
-    <Compile Include="TwoCursorsHandlerWithClipboard.cs" />
     <Page Include="Komputer.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

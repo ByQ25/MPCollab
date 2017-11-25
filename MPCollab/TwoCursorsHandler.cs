@@ -1,12 +1,11 @@
 ﻿using System;
 using System.IO;
-using Newtonsoft.Json;
 using System.Net;
 using System.Net.Sockets;
 using System.Windows;
 using System.Diagnostics;
 using System.Threading;
-using System.Runtime.InteropServices;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace MPCollab
 {
@@ -18,6 +17,7 @@ namespace MPCollab
         private TcpClient clientSocket;
         private BinaryReader bReader;
         private BinaryWriter bWriter;
+        private BinaryFormatter bFormatter;
         private Thread curSwitcher, serverRunner;
         private DTO currentDiffs;
         private int timeWin;
@@ -51,6 +51,7 @@ namespace MPCollab
             mCursor2Pos = GetMousePosition();
             screenCenter = new Point((int)SystemParameters.PrimaryScreenWidth / 2, (int)SystemParameters.PrimaryScreenHeight / 2);
             //mainSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
+            this.bFormatter = new BinaryFormatter();
             if (hostOrClient)
             {
                 this.serverSocket = new TcpListener(IPAddress.Parse(ip), 6656);
@@ -64,31 +65,14 @@ namespace MPCollab
                 this.clientSocket = new TcpClient(ip, 6656);
                 this.bReader = new BinaryReader(clientSocket.GetStream());
                 this.bWriter = new BinaryWriter(clientSocket.GetStream());
-                SetCursorPos((int)screenCenter.X, (int)screenCenter.Y);
+                NativeMethods.SetCursorPos((int)screenCenter.X, (int)screenCenter.Y);
             }
         }
 
-        [DllImport("user32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall)]
-        public static extern void mouse_event(uint dwFlags, uint dx, uint dy, uint cButtons, uint dwExtraInfo);
-
-        [DllImport("user32.dll")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool GetCursorPos(ref Win32Point pt);
-
-        [DllImport("User32.dll")]
-        private static extern bool SetCursorPos(int X, int Y);
-
-        [StructLayout(LayoutKind.Sequential)]
-        internal struct Win32Point
-        {
-            public Int32 X;
-            public Int32 Y;
-        };
-
         public static Point GetMousePosition()
         {
-            Win32Point w32Mouse = new Win32Point();
-            GetCursorPos(ref w32Mouse);
+            NativeMethods.Win32Point w32Mouse = new NativeMethods.Win32Point();
+            NativeMethods.GetCursorPos(ref w32Mouse);
             return new Point(w32Mouse.X, w32Mouse.Y);
         } 
 
@@ -101,7 +85,7 @@ namespace MPCollab
                 // Sending JSON via stream in TCPClientSocket:
                 try { SendDTO(bReader, bWriter, currentDiffs); }
                 catch { }
-                SetCursorPos((int)screenCenter.X, (int)screenCenter.Y);
+                NativeMethods.SetCursorPos((int)screenCenter.X, (int)screenCenter.Y);
             }
         }
 
@@ -164,21 +148,21 @@ namespace MPCollab
                 {
                     tmpMousePos = GetMousePosition();
                     lock (threadLock1) { secondCursorPos = mCursor2Pos; }
-                    SetCursorPos((int)mCursor2Pos.X, (int)mCursor2Pos.Y);
+                    NativeMethods.SetCursorPos((int)mCursor2Pos.X, (int)mCursor2Pos.Y);
                     if (clickLMB)
                     {
-                        mouse_event(MOUSEEVENT_K_LEFTDOWN, (uint)mCursor2Pos.X, (uint)mCursor2Pos.Y, 0, 0);
-                        mouse_event(MOUSEEVENT_K_LEFTUP, (uint)mCursor2Pos.X, (uint)mCursor2Pos.Y, 0, 0);
+                        NativeMethods.mouse_event(MOUSEEVENT_K_LEFTDOWN, (int)mCursor2Pos.X, (int)mCursor2Pos.Y, 0, (IntPtr)0);
+                        NativeMethods.mouse_event(MOUSEEVENT_K_LEFTUP, (int)mCursor2Pos.X, (int)mCursor2Pos.Y, 0, (IntPtr)0);
                         lock (threadLock3) { this.clickLMB = false; }
                     }
                     if (clickRMB)
                     {
-                        mouse_event(MOUSEEVENT_K_RIGHTDOWN, (uint)mCursor2Pos.X, (uint)mCursor2Pos.Y, 0, 0);
-                        mouse_event(MOUSEEVENT_K_RIGHTUP, (uint)mCursor2Pos.X, (uint)mCursor2Pos.Y, 0, 0);
+                        NativeMethods.mouse_event(MOUSEEVENT_K_RIGHTDOWN, (int)mCursor2Pos.X, (int)mCursor2Pos.Y, 0, (IntPtr)0);
+                        NativeMethods.mouse_event(MOUSEEVENT_K_RIGHTUP, (int)mCursor2Pos.X, (int)mCursor2Pos.Y, 0, (IntPtr)0);
                         lock (threadLock3) { this.clickRMB = false; }
                     }
                     Thread.Sleep(timeWin);
-                    SetCursorPos((int)tmpMousePos.X, (int)tmpMousePos.Y);
+                    NativeMethods.SetCursorPos((int)tmpMousePos.X, (int)tmpMousePos.Y);
                     Thread.Sleep(timeWin);
                 }
             }
@@ -189,7 +173,8 @@ namespace MPCollab
             stoper2.Reset();
             stoper2.Start();
             // Sending PSON via stream from TCPClientSocket:
-            bWriter.Write(dto.SerializePSONString());
+            bFormatter.Serialize(bWriter.BaseStream, dto);
+            bWriter.Flush();
             if (!bReader.ReadBoolean()) throw new TCHException("False acknowledgement received from the server.");
             stoper2.Stop();
             int dt = Convert.ToInt32(stoper2.ElapsedMilliseconds);
@@ -202,8 +187,7 @@ namespace MPCollab
             {
                 // Receiving JSON via stream from TCPClientSocket:
                 string tmp = "";
-                tmp = bReader.ReadString();
-                currentDiffs = tmp != "" ? DTO.DeserializeDTOObject(tmp) : new DTO(0, 0);
+                currentDiffs = tmp != "" ? (DTO)bFormatter.Deserialize(bReader.BaseStream) : new DTO(0, 0);
 
                 // Updating second cursor position in critical section:
                 lock (threadLock1)
