@@ -20,6 +20,7 @@ namespace MPCollab
         private BinaryFormatter bFormatter;
         private Thread curSwitcher, serverRunner;
         private DTO currentDiffs;
+        private ClipboardManagerImpl clipboard;
         private int timeWin;
         private bool disposed, runServer, switchCursors, hostOrClient, clickLMB, clickRMB;
         private object threadLock1, threadLock2, threadLock3;
@@ -47,6 +48,7 @@ namespace MPCollab
             this.threadLock3 = new object();
             this.stoper1 = new Stopwatch();
             this.stoper2 = new Stopwatch();
+            this.clipboard = new ClipboardManagerImpl(new DataObject());
             //mCursor2Pos = PointToScreen(Mouse.GetPosition(this));
             mCursor2Pos = GetMousePosition();
             screenCenter = new Point((int)SystemParameters.PrimaryScreenWidth / 2, (int)SystemParameters.PrimaryScreenHeight / 2);

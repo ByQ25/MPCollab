@@ -16,13 +16,20 @@ namespace MPCollab
         {
             this.clipboardTmp = clipboardTmp;
         }
+
+        //For furture purposes
+        public DataObject ClipboardTmp
+        {
+            get { return clipboardTmp; }
+        }
+        
         public void CopyClipboard()
         {
             if (Clipboard.ContainsAudio())
             {
                 MemoryStream tmp = new MemoryStream();
                 Clipboard.GetAudioStream().CopyToAsync(tmp);
-                clipboardTmp.SetAudio(tmp);   
+                clipboardTmp.SetAudio(tmp); 
             }
             if (Clipboard.ContainsFileDropList())
             {
