@@ -101,6 +101,15 @@ namespace MPCollab
                 }
         }
 
+        public void HandleCopy()
+        {
+
+        }
+        public void HandlePaste()
+        {
+
+        }
+
         // Entry point for GUI or other calling class:
         public void StartServer()
         {
@@ -182,7 +191,10 @@ namespace MPCollab
             int dt = Convert.ToInt32(stoper2.ElapsedMilliseconds);
             Thread.Sleep(dt < timeWin + 1 ? timeWin - dt : 0);
         }
+        private void SendClipboard(BinaryReader bReader, BinaryWriter bWriter, DTOext ext)
+        {
 
+        }
         private void UnpackDTO()
         {
             if (bReader != null)
@@ -207,6 +219,10 @@ namespace MPCollab
                 // Sending acknowledgement:
                 bWriter.Write(true);
             }
+        }
+        private void UnpackClipboard()
+        {
+
         }
 
         // IDisposable implementation:

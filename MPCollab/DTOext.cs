@@ -3,58 +3,43 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
+using System.Collections.Specialized;
+using System.Windows.Media.Imaging;
+using System.Runtime.Serialization;
+
 
 namespace MPCollab
 {
-    struct DTOext
+    [Serializable]
+    public struct DTOext : ISerializable
     {
         //Fields:
-        private bool copy, paste;
-        private uint type; //text,base64Image,fileDrop
-        private string clipboardData;
+        private MemoryStream audio;
+        private string text;
+        private StringCollection fileDropList;
+        private BitmapSource image;
 
-
-        //Constructors:
-        public DTOext(bool copy, bool paste, uint type, string clipboardData)
+        public DTOext(MemoryStream audio, string text, StringCollection fileDropList, BitmapSource image)
         {
-            this.copy = copy;
-            this.paste = paste;
-            this.type = type;
-            this.clipboardData = clipboardData;
+            this.audio = audio;
+            this.text = text;
+            this.fileDropList = fileDropList;
+            this.image = image;
         }
-        public DTOext(uint type, string clipboardData) : this(false, false, type, clipboardData) { }
+        public DTOext(MemoryStream audio):this(audio,"",new StringCollection(),null) { }
+        public DTOext(string text) : this(new MemoryStream(), text, new StringCollection(), null) { }
+        public DTOext(StringCollection fileDropList) : this(new MemoryStream(), "", fileDropList, null) { }
+        public DTOext(BitmapSource image) : this(new MemoryStream(), "", new StringCollection(), image) { }
+        private DTOext(SerializationInfo info, StreamingContext context) : this((MemoryStream)info.GetValue("Audio", Type.GetType("MemoryStream")), info.GetString("Text"), (StringCollection)info.GetValue("FileDropList", Type.GetType("StringCollection")), (BitmapSource)info.GetValue("Image", Type.GetType("BitmapSource"))) { }
 
-        // Properties:
-        public bool Copied { get { return copy; } }
-        public bool Pasted { get { return paste; } }
-        public uint Type { get { return type; } }
-        public string ClipboardData { get { return clipboardData; } }
-
-        public string SerializePSONString()
+        public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            return string.Format("{0};{1};{2};{3}", copy, paste, type, clipboardData); ;
-        }
-
-        public static DTOext DeserializeDTOextObject(string copy, string paste, string type, string clipboardData)
-        {
-            return new DTOext(Convert.ToBoolean(copy), Convert.ToBoolean(paste), Convert.ToUInt32(type), clipboardData);
-        }
-
-        public static DTOext DeserializeDTOextObject(string input)
-        {
-            string[] tmpT = input.Split(';');
-            bool copy, paste;
-            uint type;
-            string clipboardData = "";
-            copy = Convert.ToBoolean(tmpT[0]);
-            paste = Convert.ToBoolean(tmpT[1]);
-            type = Convert.ToUInt32(tmpT[2]);
-            for (int i = 3; i < tmpT.Length; i++)
-            {
-                clipboardData += tmpT[i];
-            }
-
-            return new DTOext(copy, paste, type, clipboardData);
+            info.AddValue("Audio", audio,Type.GetType("Memorystream"));
+            info.AddValue("Text", text);
+            info.AddValue("FileDropList", fileDropList, Type.GetType("StringCollection"));
+            info.AddValue("Image", image, Type.GetType("BitmapSource"));
+            
         }
     }
 }
