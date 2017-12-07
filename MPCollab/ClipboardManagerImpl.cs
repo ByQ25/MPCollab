@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Collections.Specialized;
+using System.Windows.Media.Imaging;
 
 namespace MPCollab
 {
@@ -63,6 +65,31 @@ namespace MPCollab
             {
                 Clipboard.SetText(clipboardTmp.GetText());
             }
+        }
+        public DTOext ExportClipboardToDTOext()
+        {
+            MemoryStream tmp = new MemoryStream();
+            if (Clipboard.ContainsAudio())
+            {
+                tmp = new MemoryStream();
+                Clipboard.GetAudioStream().CopyToAsync(tmp);
+            }
+            StringCollection sc = new StringCollection();
+            if (Clipboard.ContainsFileDropList())
+            {
+                sc = Clipboard.GetFileDropList();
+            }
+            BitmapSource bs = null;
+            if (Clipboard.ContainsImage())
+            {
+                bs = Clipboard.GetImage();
+            }
+            string txt = "";
+            if (Clipboard.ContainsText())
+            {
+                txt = Clipboard.GetText();
+            }
+            return new DTOext(tmp, txt, sc, bs);
         }
     }
 }
