@@ -35,7 +35,7 @@ namespace MPCollab
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             info.AddValue("DiffX", diffX);
-            info.AddValue("DiffY", diffX);
+            info.AddValue("DiffY", diffY);
             info.AddValue("LPMClicked", clickLPM);
             info.AddValue("PPMClicked", clickPPM);
         }

@@ -199,9 +199,8 @@ namespace MPCollab
         {
             if (bReader != null)
             {
-                // Receiving JSON via stream from TCPClientSocket:
-                string tmp = "";
-                currentDiffs = tmp != "" ? (DTO)bFormatter.Deserialize(bReader.BaseStream) : new DTO(0, 0);
+                // Receiving binary serialized DTO via stream from TCPClientSocket:
+                currentDiffs = (DTO)bFormatter.Deserialize(bReader.BaseStream);
 
                 // Updating second cursor position in critical section:
                 lock (threadLock1)
