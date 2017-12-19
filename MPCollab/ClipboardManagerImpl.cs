@@ -66,7 +66,7 @@ namespace MPCollab
                 Clipboard.SetText(clipboardTmp.GetText());
             }
         }
-        public DTOext ExportClipboardToDTOext()
+        public DTOext ExportClipboardToDTOext(bool paste)
         {
             MemoryStream tmp = new MemoryStream();
             if (Clipboard.ContainsAudio())
@@ -89,7 +89,23 @@ namespace MPCollab
             {
                 txt = Clipboard.GetText();
             }
-            return new DTOext(tmp, txt, sc, bs);
+            return new DTOext(tmp, txt, sc, bs, paste);
+        }
+        public void ImportDTOext(DTOext ext)
+        {
+            if (ext.Audio != null)
+            {
+                Clipboard.SetAudio(ext.Audio);
+            }
+            if (ext.FileDropList != null)
+            {
+                Clipboard.SetFileDropList(ext.FileDropList);
+            }
+            if (ext.Image != null)
+            {
+                Clipboard.SetImage(ext.Image);
+            }
+            Clipboard.SetText(ext.Text);
         }
     }
 }

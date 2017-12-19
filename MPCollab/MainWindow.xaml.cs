@@ -34,6 +34,15 @@ namespace MPCollab
             RoutedCommand newCmd = new RoutedCommand();
             newCmd.InputGestures.Add(new KeyGesture(System.Windows.Input.Key.S, ModifierKeys.Control));
             CommandBindings.Add(new CommandBinding(newCmd, ControlSExecuted));
+
+            newCmd = new RoutedCommand();
+            newCmd.InputGestures.Add(new KeyGesture(System.Windows.Input.Key.C, ModifierKeys.Control));
+            CommandBindings.Add(new CommandBinding(newCmd, ControlCExecuted));
+
+            newCmd = new RoutedCommand();
+            newCmd.InputGestures.Add(new KeyGesture(System.Windows.Input.Key.V, ModifierKeys.Control));
+            CommandBindings.Add(new CommandBinding(newCmd, ControlVExecuted));
+
             disposed = false;
 
             try { this.textBox.Text = GetLocalIPAddress(); }
@@ -116,9 +125,19 @@ namespace MPCollab
             if (TCH != null) TCH.HandleMouseClick(TwoCursorsHandler.MButtons.RMB);
         }
 
+        private void ControlCExecuted(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (TCH != null) TCH.HandleCopy();
+        }
+
+        private void ControlVExecuted(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (TCH != null) TCH.HandleCopy();
+        }
+
         private void ControlSExecuted(object sender, ExecutedRoutedEventArgs e)
         {
-            System.Windows.MessageBox.Show(Clipboard.GetData(DataFormats.FileDrop).ToString());
+            System.Windows.MessageBox.Show("skrót");
             
         }
 

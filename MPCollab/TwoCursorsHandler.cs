@@ -15,15 +15,15 @@ namespace MPCollab
         private Stopwatch stoper1, stoper2;
         private TcpListener serverSocket;
         private TcpClient clientSocket;
-        private BinaryReader bReader;
-        private BinaryWriter bWriter;
+        private BinaryReader bReader, bReaderExt;
+        private BinaryWriter bWriter, bWriterExt;
         private BinaryFormatter bFormatter;
-        private Thread curSwitcher, serverRunner;
+        private Thread curSwitcher, serverRunner, pasteChecker;
         private DTO currentDiffs;
         private ClipboardManagerImpl clipboard;
         private int timeWin;
-        private bool disposed, runServer, switchCursors, hostOrClient, clickLMB, clickRMB;
-        private object threadLock1, threadLock2, threadLock3;
+        private bool disposed, runServer, switchCursors, hostOrClient, clickLMB, clickRMB, paste;
+        private object threadLock1, threadLock2, threadLock3, threadlock4;
         private const int MOUSEEVENT_K_LEFTDOWN = 0x02;
         private const int MOUSEEVENT_K_LEFTUP = 0x04;
         private const int MOUSEEVENT_K_RIGHTDOWN = 0x08;
@@ -33,6 +33,7 @@ namespace MPCollab
         public const int VK_LCONTROL = 0xA2; //Left Control key code
         public const int A = 0x41;
         public const int C = 0x43;
+        public const int V = 0x56;
 
         public TwoCursorsHandler(string ip, int timeWin, bool hostOrClient)
         {
@@ -43,9 +44,11 @@ namespace MPCollab
             this.hostOrClient = hostOrClient;
             this.clickLMB = false;
             this.clickRMB = false;
+            this.paste = false;
             this.threadLock1 = new object();
             this.threadLock2 = new object();
             this.threadLock3 = new object();
+            this.threadlock4 = new object();
             this.stoper1 = new Stopwatch();
             this.stoper2 = new Stopwatch();
             this.clipboard = new ClipboardManagerImpl(new DataObject());
@@ -61,12 +64,16 @@ namespace MPCollab
                 this.clientSocket = serverSocket.AcceptTcpClient();
                 this.bReader = new BinaryReader(clientSocket.GetStream());
                 this.bWriter = new BinaryWriter(clientSocket.GetStream());
+                this.bReaderExt = new BinaryReader(clientSocket.GetStream());
+                this.bWriterExt = new BinaryWriter(clientSocket.GetStream());
             }
             else
             {
                 this.clientSocket = new TcpClient(ip, 6656);
                 this.bReader = new BinaryReader(clientSocket.GetStream());
                 this.bWriter = new BinaryWriter(clientSocket.GetStream());
+                this.bReaderExt = new BinaryReader(clientSocket.GetStream());
+                this.bWriterExt = new BinaryWriter(clientSocket.GetStream());
                 NativeMethods.SetCursorPos((int)screenCenter.X, (int)screenCenter.Y);
             }
         }
@@ -103,11 +110,17 @@ namespace MPCollab
 
         public void HandleCopy()
         {
-
+            if(clientSocket != null && clientSocket.Connected && !hostOrClient)
+            {
+                SendClipboard(bReaderExt, bWriterExt, clipboard.ExportClipboardToDTOext(false));
+            }
         }
         public void HandlePaste()
         {
-
+            if (clientSocket != null && clientSocket.Connected && !hostOrClient)
+            {
+                SendClipboard(bReaderExt, bWriterExt, clipboard.ExportClipboardToDTOext(true));
+            }
         }
 
         // Entry point for GUI or other calling class:
@@ -121,6 +134,9 @@ namespace MPCollab
                 serverRunner = new Thread(RunServer);
                 serverRunner.IsBackground = true;
                 serverRunner.Start();
+                pasteChecker = new Thread(Paste);
+                pasteChecker.IsBackground = true;
+                pasteChecker.Start();
             }
         }
 
@@ -132,7 +148,11 @@ namespace MPCollab
             {
                 stoper1.Reset();
                 stoper1.Start();
-                try { UnpackDTO(); }
+                try
+                {
+                    UnpackDTO();
+                    UnpackClipboard();
+                }
                 catch { StopServer(); }
                 stoper1.Stop();
                 dt = Convert.ToInt32(stoper1.ElapsedMilliseconds);
@@ -146,6 +166,18 @@ namespace MPCollab
             lock (threadLock2) { this.runServer = false; }
             if (curSwitcher != null && curSwitcher.IsAlive) curSwitcher.Join();
             if (serverRunner != null && serverRunner.IsAlive) serverRunner.Abort();
+        }
+
+        private void Paste()
+        {
+            if (this.paste)
+            {
+                NativeMethods.keybd_event(VK_LCONTROL, 0, KEYEVENTF_EXTENDEDKEY, 0);
+                NativeMethods.keybd_event(V, 0, KEYEVENTF_EXTENDEDKEY, 0);
+                NativeMethods.keybd_event(V, 0, KEYEVENTF_KEYUP, 0);
+                NativeMethods.keybd_event(VK_LCONTROL, 0, KEYEVENTF_KEYUP, 0);
+                lock (threadlock4) { paste = false; }
+            }
         }
 
         private void SwitchCursors()
@@ -191,9 +223,17 @@ namespace MPCollab
             int dt = Convert.ToInt32(stoper2.ElapsedMilliseconds);
             Thread.Sleep(dt < timeWin + 1 ? timeWin - dt : 0);
         }
-        private void SendClipboard(BinaryReader bReader, BinaryWriter bWriter, DTOext ext)
+        private void SendClipboard(BinaryReader bReaderExt, BinaryWriter bWriterExt, DTOext ext)
         {
+            stoper2.Reset();
+            stoper2.Start();
 
+            bFormatter.Serialize(bWriterExt.BaseStream, ext);
+            bWriterExt.Flush();
+            if (!bReaderExt.ReadBoolean()) throw new TCHException("False acknowledgement received from the server.");
+            stoper2.Stop();
+            int dt = Convert.ToInt32(stoper2.ElapsedMilliseconds);
+            Thread.Sleep(dt < timeWin + 1 ? timeWin - dt : 0);
         }
         private void UnpackDTO()
         {
@@ -221,7 +261,17 @@ namespace MPCollab
         }
         private void UnpackClipboard()
         {
+            if (bReaderExt != null)
+            {
+                clipboard.CopyClipboard();
+                DTOext tmp = (DTOext)bFormatter.Deserialize(bReaderExt.BaseStream);
+                clipboard.ImportDTOext(tmp);
 
+                if (tmp.Paste)
+                    lock(threadlock4) { paste = true; }
+                
+                bWriterExt.Write(true);
+            }
         }
 
         // IDisposable implementation:
@@ -250,6 +300,12 @@ namespace MPCollab
                     bWriter.Close();
                     bWriter.Dispose();
                     bWriter = null;
+                    bReaderExt.Close();
+                    bReaderExt.Dispose();
+                    bReaderExt = null;
+                    bWriterExt.Close();
+                    bWriterExt.Dispose();
+                    bWriterExt = null;
                     if (curSwitcher != null && curSwitcher.IsAlive)
                     {
                         curSwitcher.Abort();
