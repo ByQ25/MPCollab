@@ -170,13 +170,13 @@ namespace MPCollab
 
         private void Paste()
         {
-            if (this.paste)
+            if (this.paste && hostOrClient)
             {
                 NativeMethods.keybd_event(VK_LCONTROL, 0, KEYEVENTF_EXTENDEDKEY, 0);
                 NativeMethods.keybd_event(V, 0, KEYEVENTF_EXTENDEDKEY, 0);
                 NativeMethods.keybd_event(V, 0, KEYEVENTF_KEYUP, 0);
                 NativeMethods.keybd_event(VK_LCONTROL, 0, KEYEVENTF_KEYUP, 0);
-                lock (threadlock4) { paste = false; }
+                lock (threadlock4) { this.paste = false; }
             }
         }
 
@@ -268,7 +268,7 @@ namespace MPCollab
                 clipboard.ImportDTOext(tmp);
 
                 if (tmp.Paste)
-                    lock(threadlock4) { paste = true; }
+                    lock(threadlock4) { this.paste = true; }
                 
                 bWriterExt.Write(true);
             }

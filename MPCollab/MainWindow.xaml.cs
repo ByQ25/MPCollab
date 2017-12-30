@@ -132,7 +132,7 @@ namespace MPCollab
 
         private void ControlVExecuted(object sender, ExecutedRoutedEventArgs e)
         {
-            if (TCH != null) TCH.HandleCopy();
+            if (TCH != null) TCH.HandlePaste();
         }
 
         private void ControlSExecuted(object sender, ExecutedRoutedEventArgs e)
