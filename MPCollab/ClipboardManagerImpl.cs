@@ -66,6 +66,7 @@ namespace MPCollab
                 Clipboard.SetText(clipboardTmp.GetText());
             }
         }
+
         public DTOext ExportClipboardToDTOext(bool paste)
         {
             MemoryStream tmp = new MemoryStream();

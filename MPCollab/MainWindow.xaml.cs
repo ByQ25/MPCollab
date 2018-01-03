@@ -127,18 +127,17 @@ namespace MPCollab
 
         private void ControlCExecuted(object sender, ExecutedRoutedEventArgs e)
         {
-            if (TCH != null) TCH.HandleCopy();
+            if (TCH != null && !hostOrClient) TCH.HandleCopy();
         }
 
         private void ControlVExecuted(object sender, ExecutedRoutedEventArgs e)
         {
-            if (TCH != null) TCH.HandlePaste();
+            if (TCH != null && !hostOrClient) TCH.HandlePaste();
         }
 
         private void ControlSExecuted(object sender, ExecutedRoutedEventArgs e)
         {
             System.Windows.MessageBox.Show("skrót");
-            
         }
 
         private void StartBlinking(Komputer com1, Komputer com2)

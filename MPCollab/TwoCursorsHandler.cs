@@ -62,20 +62,16 @@ namespace MPCollab
                 this.serverSocket = new TcpListener(IPAddress.Parse(ip), 6656);
                 this.serverSocket.Start();
                 this.clientSocket = serverSocket.AcceptTcpClient();
-                this.bReader = new BinaryReader(clientSocket.GetStream());
-                this.bWriter = new BinaryWriter(clientSocket.GetStream());
-                this.bReaderExt = new BinaryReader(clientSocket.GetStream());
-                this.bWriterExt = new BinaryWriter(clientSocket.GetStream());
             }
             else
             {
                 this.clientSocket = new TcpClient(ip, 6656);
-                this.bReader = new BinaryReader(clientSocket.GetStream());
-                this.bWriter = new BinaryWriter(clientSocket.GetStream());
-                this.bReaderExt = new BinaryReader(clientSocket.GetStream());
-                this.bWriterExt = new BinaryWriter(clientSocket.GetStream());
                 NativeMethods.SetCursorPos((int)screenCenter.X, (int)screenCenter.Y);
             }
+            this.bReader = new BinaryReader(clientSocket.GetStream());
+            this.bWriter = new BinaryWriter(clientSocket.GetStream());
+            this.bReaderExt = new BinaryReader(clientSocket.GetStream());
+            this.bWriterExt = new BinaryWriter(clientSocket.GetStream());
         }
 
         public static Point GetMousePosition()
@@ -108,12 +104,13 @@ namespace MPCollab
                 }
         }
 
+        // TODO We should probably delete HandleCopy method
         public void HandleCopy()
         {
-            if(clientSocket != null && clientSocket.Connected && !hostOrClient)
-            {
-                SendClipboard(bReaderExt, bWriterExt, clipboard.ExportClipboardToDTOext(false));
-            }
+            //if(clientSocket != null && clientSocket.Connected && !hostOrClient)
+            //{
+            //    SendClipboard(bReaderExt, bWriterExt, clipboard.ExportClipboardToDTOext(false));
+            //}
         }
         public void HandlePaste()
         {
@@ -150,8 +147,11 @@ namespace MPCollab
                 stoper1.Start();
                 try
                 {
-                    UnpackDTO();
-                    UnpackClipboard();
+                    switch (bReader.ReadByte())
+                    {
+                        case 0: UnpackDTO(); break;
+                        case 1: UnpackClipboard(); break;
+                    }
                 }
                 catch { StopServer(); }
                 stoper1.Stop();
@@ -215,7 +215,8 @@ namespace MPCollab
         {
             stoper2.Reset();
             stoper2.Start();
-            // Sending PSON via stream from TCPClientSocket:
+            // Sending BinaryDTO via stream from TCPClientSocket:
+            bWriter.Write((byte)0); // DTO type info tag
             bFormatter.Serialize(bWriter.BaseStream, dto);
             bWriter.Flush();
             if (!bReader.ReadBoolean()) throw new TCHException("False acknowledgement received from the server.");
@@ -223,11 +224,14 @@ namespace MPCollab
             int dt = Convert.ToInt32(stoper2.ElapsedMilliseconds);
             Thread.Sleep(dt < timeWin + 1 ? timeWin - dt : 0);
         }
+
+        // TODO: SendDTO and SendClipboard shold be merged into one method. They are basically the same.
         private void SendClipboard(BinaryReader bReaderExt, BinaryWriter bWriterExt, DTOext ext)
         {
             stoper2.Reset();
             stoper2.Start();
-
+            // Sending BinaryDTOext via stream from TCPClientSocket:
+            bWriterExt.Write((byte)1); // DTOext type info tag
             bFormatter.Serialize(bWriterExt.BaseStream, ext);
             bWriterExt.Flush();
             if (!bReaderExt.ReadBoolean()) throw new TCHException("False acknowledgement received from the server.");
@@ -235,6 +239,7 @@ namespace MPCollab
             int dt = Convert.ToInt32(stoper2.ElapsedMilliseconds);
             Thread.Sleep(dt < timeWin + 1 ? timeWin - dt : 0);
         }
+
         private void UnpackDTO()
         {
             if (bReader != null)
@@ -259,6 +264,7 @@ namespace MPCollab
                 bWriter.Write(true);
             }
         }
+
         private void UnpackClipboard()
         {
             if (bReaderExt != null)
