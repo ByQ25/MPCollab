@@ -303,12 +303,6 @@ namespace MPCollab
                     bWriter.Close();
                     bWriter.Dispose();
                     bWriter = null;
-                    bReaderExt.Close();
-                    bReaderExt.Dispose();
-                    bReaderExt = null;
-                    bWriterExt.Close();
-                    bWriterExt.Dispose();
-                    bWriterExt = null;
                     if (curSwitcher != null && curSwitcher.IsAlive)
                     {
                         curSwitcher.Abort();
