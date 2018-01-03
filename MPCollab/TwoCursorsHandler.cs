@@ -15,8 +15,8 @@ namespace MPCollab
         private Stopwatch stoper1, stoper2;
         private TcpListener serverSocket;
         private TcpClient clientSocket;
-        private BinaryReader bReader, bReaderExt;
-        private BinaryWriter bWriter, bWriterExt;
+        private BinaryReader bReader;
+        private BinaryWriter bWriter;
         private BinaryFormatter bFormatter;
         private Thread curSwitcher, serverRunner, pasteChecker;
         private DTO currentDiffs;
@@ -70,8 +70,6 @@ namespace MPCollab
             }
             this.bReader = new BinaryReader(clientSocket.GetStream());
             this.bWriter = new BinaryWriter(clientSocket.GetStream());
-            this.bReaderExt = new BinaryReader(clientSocket.GetStream());
-            this.bWriterExt = new BinaryWriter(clientSocket.GetStream());
         }
 
         public static Point GetMousePosition()
@@ -116,7 +114,7 @@ namespace MPCollab
         {
             if (clientSocket != null && clientSocket.Connected && !hostOrClient)
             {
-                SendClipboard(bReaderExt, bWriterExt, clipboard.ExportClipboardToDTOext(true));
+                SendClipboard(bReader, bWriter, clipboard.ExportClipboardToDTOext(true));
             }
         }
 
@@ -211,13 +209,22 @@ namespace MPCollab
             }
         }
 
-        private void SendDTO(BinaryReader bReader, BinaryWriter bWriter, DTO dto)
+        private void SendDTO(BinaryReader bReader, BinaryWriter bWriter, object dto)
         {
             stoper2.Reset();
             stoper2.Start();
             // Sending BinaryDTO via stream from TCPClientSocket:
-            bWriter.Write((byte)0); // DTO type info tag
-            bFormatter.Serialize(bWriter.BaseStream, dto);
+            if (dto is DTO)
+            {
+                bWriter.Write((byte)0); // DTO type info tag
+                bFormatter.Serialize(bWriter.BaseStream, (DTO)dto);
+            }
+            else if (dto is DTOext)
+            {
+                bWriter.Write((byte)1); // DTOext type info tag
+                bFormatter.Serialize(bWriter.BaseStream, (DTOext)dto);
+            }
+            else throw new TCHException("Received non supported DTO type.");
             bWriter.Flush();
             if (!bReader.ReadBoolean()) throw new TCHException("False acknowledgement received from the server.");
             stoper2.Stop();
@@ -225,19 +232,9 @@ namespace MPCollab
             Thread.Sleep(dt < timeWin + 1 ? timeWin - dt : 0);
         }
 
-        // TODO: SendDTO and SendClipboard shold be merged into one method. They are basically the same.
         private void SendClipboard(BinaryReader bReaderExt, BinaryWriter bWriterExt, DTOext ext)
         {
-            stoper2.Reset();
-            stoper2.Start();
-            // Sending BinaryDTOext via stream from TCPClientSocket:
-            bWriterExt.Write((byte)1); // DTOext type info tag
-            bFormatter.Serialize(bWriterExt.BaseStream, ext);
-            bWriterExt.Flush();
-            if (!bReaderExt.ReadBoolean()) throw new TCHException("False acknowledgement received from the server.");
-            stoper2.Stop();
-            int dt = Convert.ToInt32(stoper2.ElapsedMilliseconds);
-            Thread.Sleep(dt < timeWin + 1 ? timeWin - dt : 0);
+            this.SendDTO(bReaderExt, bWriterExt, ext);
         }
 
         private void UnpackDTO()
@@ -267,16 +264,16 @@ namespace MPCollab
 
         private void UnpackClipboard()
         {
-            if (bReaderExt != null)
+            if (bReader != null)
             {
                 clipboard.CopyClipboard();
-                DTOext tmp = (DTOext)bFormatter.Deserialize(bReaderExt.BaseStream);
+                DTOext tmp = (DTOext)bFormatter.Deserialize(bReader.BaseStream);
                 clipboard.ImportDTOext(tmp);
 
                 if (tmp.Paste)
                     lock(threadlock4) { this.paste = true; }
                 
-                bWriterExt.Write(true);
+                bWriter.Write(true);
             }
         }
 
