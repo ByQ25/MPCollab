@@ -62,13 +62,21 @@ namespace MPCollab
         private System.Drawing.Bitmap BitmapFromSource(BitmapSource bitmapsource)
         {
             System.Drawing.Bitmap bitmap;
-            using (MemoryStream outStream = new MemoryStream())
+            if (bitmapsource != null)
             {
-                BitmapEncoder enc = new BmpBitmapEncoder();
-                enc.Frames.Add(BitmapFrame.Create(bitmapsource));
-                enc.Save(outStream);
-                bitmap = new System.Drawing.Bitmap(outStream);
+                using (MemoryStream outStream = new MemoryStream())
+                {
+                    BitmapEncoder enc = new BmpBitmapEncoder();
+                    enc.Frames.Add(BitmapFrame.Create(bitmapsource));
+                    enc.Save(outStream);
+                    bitmap = new System.Drawing.Bitmap(outStream);
+                }
             }
+            else
+            {
+                bitmap = new System.Drawing.Bitmap(1, 1);
+            }
+            
             return bitmap;
         }
         private BitmapSource SourceFromBitmap(System.Drawing.Bitmap bitmap)
@@ -80,7 +88,7 @@ namespace MPCollab
                 array = stream.ToArray();
             }
 
-            var img = new System.Windows.Media.Imaging.BitmapImage();
+            var img = new BitmapImage();
             using (MemoryStream outStream = new MemoryStream(array))
             {
                 img.BeginInit();
