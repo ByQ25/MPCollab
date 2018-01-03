@@ -188,23 +188,29 @@ namespace MPCollab
                 while (switchCursors)
                 {
                     tmpMousePos = GetMousePosition();
-                    lock (threadLock1) { secondCursorPos = mCursor2Pos; }
-                    NativeMethods.SetCursorPos((int)mCursor2Pos.X, (int)mCursor2Pos.Y);
-                    if (clickLMB)
+                    // Skip whole cursor position procedure switch when cursors positions seems to be the same.
+                    if (tmpMousePos.X != mCursor2Pos.X || tmpMousePos.Y != mCursor2Pos.Y)
                     {
-                        NativeMethods.mouse_event(MOUSEEVENT_K_LEFTDOWN, (int)mCursor2Pos.X, (int)mCursor2Pos.Y, 0, (IntPtr)0);
-                        NativeMethods.mouse_event(MOUSEEVENT_K_LEFTUP, (int)mCursor2Pos.X, (int)mCursor2Pos.Y, 0, (IntPtr)0);
-                        lock (threadLock3) { this.clickLMB = false; }
+                        lock (threadLock1) { secondCursorPos = mCursor2Pos; }
+                        if (tmpMousePos.X != secondCursorPos.X && tmpMousePos.Y != secondCursorPos.Y)
+                            NativeMethods.SetCursorPos((int)mCursor2Pos.X, (int)mCursor2Pos.Y);
+                        if (clickLMB)
+                        {
+                            NativeMethods.mouse_event(MOUSEEVENT_K_LEFTDOWN, (int)mCursor2Pos.X, (int)mCursor2Pos.Y, 0, (IntPtr)0);
+                            NativeMethods.mouse_event(MOUSEEVENT_K_LEFTUP, (int)mCursor2Pos.X, (int)mCursor2Pos.Y, 0, (IntPtr)0);
+                            lock (threadLock3) { this.clickLMB = false; }
+                        }
+                        if (clickRMB)
+                        {
+                            NativeMethods.mouse_event(MOUSEEVENT_K_RIGHTDOWN, (int)mCursor2Pos.X, (int)mCursor2Pos.Y, 0, (IntPtr)0);
+                            NativeMethods.mouse_event(MOUSEEVENT_K_RIGHTUP, (int)mCursor2Pos.X, (int)mCursor2Pos.Y, 0, (IntPtr)0);
+                            lock (threadLock3) { this.clickRMB = false; }
+                        }
+                        Thread.Sleep(timeWin);
+                        NativeMethods.SetCursorPos((int)tmpMousePos.X, (int)tmpMousePos.Y);
+                        Thread.Sleep(timeWin);
                     }
-                    if (clickRMB)
-                    {
-                        NativeMethods.mouse_event(MOUSEEVENT_K_RIGHTDOWN, (int)mCursor2Pos.X, (int)mCursor2Pos.Y, 0, (IntPtr)0);
-                        NativeMethods.mouse_event(MOUSEEVENT_K_RIGHTUP, (int)mCursor2Pos.X, (int)mCursor2Pos.Y, 0, (IntPtr)0);
-                        lock (threadLock3) { this.clickRMB = false; }
-                    }
-                    Thread.Sleep(timeWin);
-                    NativeMethods.SetCursorPos((int)tmpMousePos.X, (int)tmpMousePos.Y);
-                    Thread.Sleep(timeWin);
+                    else Thread.Sleep(2 * timeWin);
                 }
             }
         }
