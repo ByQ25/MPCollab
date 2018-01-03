@@ -43,7 +43,7 @@ namespace MPCollab
 
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            info.AddValue("Audio", audio,Type.GetType("Memorystream"));
+            info.AddValue("Audio", audio,Type.GetType("MemoryStream"));
             info.AddValue("Text", text);
             info.AddValue("FileDropList", fileDropList, Type.GetType("StringCollection"));
             info.AddValue("Image", image, Type.GetType("BitmapSource"));

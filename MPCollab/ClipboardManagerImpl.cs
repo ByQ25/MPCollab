@@ -72,7 +72,6 @@ namespace MPCollab
             MemoryStream tmp = new MemoryStream();
             if (Clipboard.ContainsAudio())
             {
-                tmp = new MemoryStream();
                 Clipboard.GetAudioStream().CopyToAsync(tmp);
             }
             StringCollection sc = new StringCollection();
