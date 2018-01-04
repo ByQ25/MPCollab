@@ -34,5 +34,6 @@
             </Label.Background>
         </Label>
         <Button x:Name="buttonClientRight" Content="Połącz" HorizontalAlignment="Right" Margin="0,103,28,59" VerticalAlignment="Center" Width="75" Click="buttonClientRight_Click" Background="White"/>
+        <Label x:Name="backgroundLabel" Content="Background pattern from Subtle Patterns" HorizontalAlignment="Left" Margin="-3,186,0,-4" VerticalAlignment="Bottom" Foreground="#FF898989" FontSize="6" Height="17" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
     </Grid>
 </Window>

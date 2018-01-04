@@ -9,6 +9,7 @@ namespace MPCollab
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
+    // TODO: Let's consider an option of installing dll embedding package: Install-Package Costura.Fody
     public partial class MainWindow : Window, IDisposable
     {
         private TwoCursorsHandler TCH;
