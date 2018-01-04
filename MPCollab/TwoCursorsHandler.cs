@@ -35,6 +35,10 @@ namespace MPCollab
         public const int C = 0x43;
         public const int V = 0x56;
 
+        //Events:
+        public delegate void CollabEvent();
+        public event CollabEvent OnPushClipboard;
+
         public TwoCursorsHandler(string ip, int timeWin, bool hostOrClient)
         {
             this.timeWin = timeWin;
@@ -130,9 +134,9 @@ namespace MPCollab
                 serverRunner = new Thread(RunServer);
                 serverRunner.IsBackground = true;
                 serverRunner.Start();
-                pasteChecker = new Thread(Paste);
-                pasteChecker.IsBackground = true;
-                pasteChecker.Start();
+                //pasteChecker = new Thread(Paste);
+                //pasteChecker.IsBackground = true;
+                //pasteChecker.Start();
             }
         }
 
@@ -167,7 +171,7 @@ namespace MPCollab
             if (serverRunner != null && serverRunner.IsAlive) serverRunner.Abort();
         }
 
-        private void Paste()
+        public void Paste()
         {
             if (this.paste && hostOrClient)
             {
@@ -270,6 +274,7 @@ namespace MPCollab
         {
             if (bReader != null)
             {
+                OnPushClipboard();
                 clipboard.CopyClipboard();
                 DTOext tmp = (DTOext)bFormatter.Deserialize(bReader.BaseStream);
                 clipboard.ImportDTOext(tmp);

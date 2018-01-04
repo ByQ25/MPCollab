@@ -54,6 +54,7 @@ namespace MPCollab
             if (TCH == null) TCH = new TwoCursorsHandler(localIPLabel.Content.ToString(), timeWin, hostOrClient);
             TCH.StartServer();
             bottomLabel.Content = "Połączenie zosało nawiązane.";
+            TCH.OnPushClipboard += TCH.Paste;
             // TODO: Server should blink on computers that connected, not always left and center.
             StartBlinking((Komputer)vb1.Child,(Komputer)vb2.Child); 
         }
