@@ -53,7 +53,7 @@ namespace MPCollab
             this.stoper2 = new Stopwatch();
             this.clipboard = new ClipboardManagerImpl(new DataObject());
             //mCursor2Pos = PointToScreen(Mouse.GetPosition(this));
-            mCursor2Pos = GetMousePosition();
+            mHostCursor1Pos = mCursor2Pos = GetMousePosition();
             screenCenter = new Point((int)SystemParameters.PrimaryScreenWidth / 2, (int)SystemParameters.PrimaryScreenHeight / 2);
             //mainSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
             this.bFormatter = new BinaryFormatter();
@@ -189,7 +189,7 @@ namespace MPCollab
                 while (switchCursors)
                 {
                     tmpMousePos = GetMousePosition();
-                    if (ComputeDistance(mHostCursor1Pos, mCursor2Pos) > 8.0)
+                    if (ComputeDistance(mHostCursor1Pos, tmpMousePos) < 128.0)
                         mHostCursor1Pos = tmpMousePos;
                     lock (threadLock1) { secondCursorPos = mCursor2Pos; }
                     if (tmpMousePos.X != secondCursorPos.X && tmpMousePos.Y != secondCursorPos.Y)
