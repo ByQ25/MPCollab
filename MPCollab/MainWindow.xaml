@@ -22,7 +22,7 @@
             <custom:Komputer x:Name="hostComputer"/>
         </Viewbox>
         <Label x:Name="bottomLabel" Content="Połączenie nie zostało nawiązane." HorizontalAlignment="Left" Margin="222,221,0,0" VerticalAlignment="Top" Width="184"/>
-        <Label x:Name="localIPLabel" Content="Label" HorizontalAlignment="Left" Margin="218,89,0,0" VerticalAlignment="Top" Height="23" Width="75"/>
+        <Label x:Name="localIPLabel" Content="Label" HorizontalAlignment="Left" Margin="208,89,0,0" VerticalAlignment="Top" Height="23" Width="100"/>
         <Button x:Name="buttonClientRight" Content="Połącz" HorizontalAlignment="Left" Margin="331,181,0,0" VerticalAlignment="Top" Width="75" Click="buttonClientRight_Click"/>
     </Grid>
 </Window>

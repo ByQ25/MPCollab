@@ -50,7 +50,7 @@ namespace MPCollab
         private void ServerSideProcedure()
         {
             hostOrClient = true;
-            if (TCH == null) TCH = new TwoCursorsHandler(localIPLabel.ContentStringFormat, timeWin, hostOrClient);
+            if (TCH == null) TCH = new TwoCursorsHandler(localIPLabel.Content.ToString(), timeWin, hostOrClient);
             TCH.StartServer();
             bottomLabel.Content = "Połączenie zosało nawiązane.";
             StartBlinking((Komputer)vb1.Child,(Komputer)vb2.Child);
