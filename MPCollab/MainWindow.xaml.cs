@@ -54,17 +54,26 @@ namespace MPCollab
             if (TCH == null) TCH = new TwoCursorsHandler(localIPLabel.Content.ToString(), timeWin, hostOrClient);
             TCH.StartServer();
             bottomLabel.Content = "Połączenie zosało nawiązane.";
-            StartBlinking((Komputer)vb1.Child,(Komputer)vb2.Child);
-            
+            // TODO: Server should blink on computers that connected, not always left and center.
+            StartBlinking((Komputer)vb1.Child,(Komputer)vb2.Child); 
         }
 
         // TODO: Some IP validation tool might proove to be useful here.
         private void ClientSideProcedure(byte computerTag)
         {
-            hostOrClient = false;
-            Mouse.OverrideCursor = Cursors.None;
             if (TCH == null)
             {
+                // Locking mouse cursor in the window:
+                Point lockingRect = this.PointToScreen(new Point(0, 0));
+                System.Drawing.Rectangle r = new System.Drawing.Rectangle(
+                    (int)lockingRect.X,
+                    (int)lockingRect.Y,
+                    (int)(lockingRect.X + this.Width - 8 * SystemParameters.BorderWidth),
+                    (int)(lockingRect.Y + this.Height - 1.5 * SystemParameters.WindowCaptionHeight));
+                NativeMethods.ClipCursor(ref r);
+
+                hostOrClient = false;
+                DisableWindowControls();
                 switch (computerTag)
                 {
                     case 0:
@@ -79,6 +88,26 @@ namespace MPCollab
             }
         }
 
+        private void DisableWindowControls()
+        {
+            this.leftCompIPTB.IsEnabled = false;
+            this.rightCompIPTB.IsEnabled = false;
+            this.buttonClientLeft.IsEnabled = false;
+            this.buttonHost.IsEnabled = false;
+            this.buttonClientRight.IsEnabled = false;
+            Mouse.OverrideCursor = Cursors.None;
+        }
+
+        private void EnableWindowControls()
+        {
+            this.leftCompIPTB.IsEnabled = true;
+            this.rightCompIPTB.IsEnabled = true;
+            this.buttonClientLeft.IsEnabled = true;
+            this.buttonHost.IsEnabled = true;
+            this.buttonClientRight.IsEnabled = true;
+            Mouse.OverrideCursor = Cursors.Arrow;
+        }
+
         private void RestoreAppToInitialState()
         {
             if (TCH != null)
@@ -87,7 +116,8 @@ namespace MPCollab
                 TCH.Dispose();
                 TCH = null;
             }
-            Mouse.OverrideCursor = Cursors.Arrow;
+            NativeMethods.ClipCursor(IntPtr.Zero);
+            EnableWindowControls();
             Komputer[] comps = { (Komputer)vb1.Child, (Komputer)vb2.Child, (Komputer)vb3.Child };
             StopBlinking(comps);
             bottomLabel.Content = "Połączenie zosało zakończone.";

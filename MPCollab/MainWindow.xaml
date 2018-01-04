@@ -6,7 +6,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MPCollab"
         mc:Ignorable="d"
-        Title="MPCollab" Height="219.911" Width="359.292" WindowStartupLocation="CenterScreen" KeyDown="MainWin_KeyDown" MouseMove="MainWin_MouseMove" MouseLeftButtonDown="MainWin_MouseLeftButtonDown" MouseRightButtonDown="MainWin_MouseRightButtonDown" SizeToContent="WidthAndHeight"
+        Title="MPCollab" WindowStartupLocation="CenterScreen" KeyDown="MainWin_KeyDown" MouseMove="MainWin_MouseMove" MouseLeftButtonDown="MainWin_MouseLeftButtonDown" MouseRightButtonDown="MainWin_MouseRightButtonDown" SizeToContent="WidthAndHeight"
         MinHeight="230"
         MinWidth="365" Icon="MPCollab-icon.ico"
         >

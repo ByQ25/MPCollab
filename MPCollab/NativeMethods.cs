@@ -15,6 +15,12 @@ namespace MPCollab
         [DllImport("User32.dll")]
         internal static extern bool SetCursorPos(int X, int Y);
 
+        [DllImport("user32.dll")]
+        internal static extern void ClipCursor(ref System.Drawing.Rectangle rect);
+
+        [DllImport("user32.dll")]
+        internal static extern void ClipCursor(IntPtr rect);
+
         [StructLayout(LayoutKind.Sequential)]
         internal struct Win32Point
         {
