@@ -12,13 +12,13 @@
         <Button x:Name="buttonHost" Content="Hostuj" HorizontalAlignment="Left" Margin="218,181,0,0" VerticalAlignment="Top" Width="75" Click="buttonHost_Click"/>
         <Button x:Name="buttonClientLeft" Content="Połącz" HorizontalAlignment="Left" Margin="106,181,0,0" VerticalAlignment="Top" Width="75" Click="buttonClientLeft_Click"/>
         <TextBox x:Name="rightCompIPTB" HorizontalAlignment="Left" Height="23" Margin="318,89,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="88"/>
-        <Viewbox x:Name="vb1" StretchDirection="Both" Stretch="Uniform" Margin="98,96,319,123" Height="100" Width="100">
+        <Viewbox x:Name="vb1" Margin="98,117,0,0" Height="100" Width="100" VerticalAlignment="Top" HorizontalAlignment="Left">
             <custom:Komputer x:Name="computer1"/>
         </Viewbox>
-        <Viewbox x:Name="vb3" StretchDirection="Both" Stretch="Uniform" Margin="318,96,99,123" Height="100" Width="100">
+        <Viewbox x:Name="vb3" StretchDirection="Both" Stretch="Uniform" Margin="318,117,0,0" Height="100" Width="100" HorizontalAlignment="Left" VerticalAlignment="Top">
             <custom:Komputer x:Name="computer2"/>
         </Viewbox>
-        <Viewbox x:Name="vb2" StretchDirection="Both" Stretch="Uniform" Margin="208,96,209,123" Height="100" Width="100">
+        <Viewbox x:Name="vb2" StretchDirection="Both" Stretch="Uniform" Margin="208,117,0,0" Height="100" Width="100" HorizontalAlignment="Left" VerticalAlignment="Top">
             <custom:Komputer x:Name="hostComputer"/>
         </Viewbox>
         <Label x:Name="bottomLabel" Content="Połączenie nie zostało nawiązane." HorizontalAlignment="Left" Margin="222,221,0,0" VerticalAlignment="Top" Width="184"/>
