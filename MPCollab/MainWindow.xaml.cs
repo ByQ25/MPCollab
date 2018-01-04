@@ -1,19 +1,8 @@
 ﻿using System;
-using System.Text;
 using System.Net;
 using System.Net.Sockets;
 using System.Windows;
 using System.Windows.Input;
-using System.Runtime.InteropServices;
-using System.Collections.Generic;
-using System.Linq;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace MPCollab
 {
@@ -45,7 +34,7 @@ namespace MPCollab
 
             disposed = false;
 
-            try { this.textBox.Text = GetLocalIPAddress(); }
+            try { this.localIPLabel.Content = GetLocalIPAddress(); }
             catch (ApplicationException) { }
         }
 
@@ -61,19 +50,32 @@ namespace MPCollab
         private void ServerSideProcedure()
         {
             hostOrClient = true;
-            if (TCH == null) TCH = new TwoCursorsHandler(textBox.Text, timeWin, hostOrClient);
+            if (TCH == null) TCH = new TwoCursorsHandler(localIPLabel.ContentStringFormat, timeWin, hostOrClient);
             TCH.StartServer();
             bottomLabel.Content = "Połączenie zosało nawiązane.";
             StartBlinking((Komputer)vb1.Child,(Komputer)vb2.Child);
             
         }
 
-        private void ClientSideProcedure()
+        // TODO: Some IP validation tool might proove to be useful here.
+        private void ClientSideProcedure(byte computerTag)
         {
             hostOrClient = false;
             Mouse.OverrideCursor = Cursors.None;
-            if (TCH == null) TCH = new TwoCursorsHandler(textBox.Text, timeWin, hostOrClient);
-            StartBlinking((Komputer)vb1.Child, (Komputer)vb2.Child);
+            if (TCH == null)
+            {
+                switch (computerTag)
+                {
+                    case 0:
+                        TCH = new TwoCursorsHandler(leftCompIPTB.Text, timeWin, hostOrClient);
+                        StartBlinking((Komputer)vb1.Child, (Komputer)vb2.Child);
+                        break;
+                    case 1:
+                        TCH = new TwoCursorsHandler(rightCompIPTB.Text, timeWin, hostOrClient);
+                        StartBlinking((Komputer)vb2.Child, (Komputer)vb3.Child);
+                        break;
+                }
+            }
         }
 
         private void RestoreAppToInitialState()
@@ -85,7 +87,8 @@ namespace MPCollab
                 TCH = null;
             }
             Mouse.OverrideCursor = Cursors.Arrow;
-            StopBlinking((Komputer)vb1.Child, (Komputer)vb2.Child);
+            Komputer[] comps = { (Komputer)vb1.Child, (Komputer)vb2.Child, (Komputer)vb3.Child };
+            StopBlinking(comps);
             bottomLabel.Content = "Połączenie zosało zakończone.";
         }
 
@@ -95,7 +98,8 @@ namespace MPCollab
             switch(e.Key)
             {
                 case Key.NumPad1: ServerSideProcedure(); break;
-                case Key.NumPad2: ClientSideProcedure(); break;
+                case Key.NumPad2: ClientSideProcedure(0); break;
+                case Key.NumPad3: ClientSideProcedure(1); break;
                 case Key.Escape: RestoreAppToInitialState(); break;
             }
         }
@@ -105,9 +109,14 @@ namespace MPCollab
             ServerSideProcedure();
         }
 
-        private void buttonClient_Click(object sender, RoutedEventArgs e)
+        private void buttonClientLeft_Click(object sender, RoutedEventArgs e)
         {
-            ClientSideProcedure();
+            ClientSideProcedure(0);
+        }
+
+        private void buttonClientRight_Click(object sender, RoutedEventArgs e)
+        {
+            ClientSideProcedure(1);
         }
 
         private void MainWin_MouseMove(object sender, MouseEventArgs e)
@@ -146,12 +155,11 @@ namespace MPCollab
             com2.Start();
         }
 
-        private void StopBlinking(Komputer com1, Komputer com2)
+        private void StopBlinking(Komputer[] comps)
         {
-            com1.Stop();
-            com2.Stop();
+            foreach (Komputer comp in comps)
+                comp.Stop();
         }
-
 
         // IDisposable implementation:
         public void Dispose()

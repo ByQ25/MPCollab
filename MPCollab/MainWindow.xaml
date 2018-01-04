@@ -8,20 +8,21 @@
         mc:Ignorable="d"
         Title="MPCollab" Height="350" Width="525" WindowStartupLocation="CenterScreen" KeyDown="MainWin_KeyDown" MouseMove="MainWin_MouseMove" MouseLeftButtonDown="MainWin_MouseLeftButtonDown" MouseRightButtonDown="MainWin_MouseRightButtonDown">
     <Grid>
-        <Label x:Name="labelIP" Content="Adres IP:" HorizontalAlignment="Left" Height="25" Margin="40,22,0,0" VerticalAlignment="Top" Width="70"/>
-        <TextBox x:Name="textBox" HorizontalAlignment="Left" Height="23" Margin="40,50,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="100"/>
-        <Button x:Name="buttonHost" Content="Hostuj" HorizontalAlignment="Left" Margin="40,264,0,0" VerticalAlignment="Top" Width="75" Click="buttonHost_Click"/>
-        <Button x:Name="buttonClient" Content="Połącz" HorizontalAlignment="Left" Margin="141,264,0,0" VerticalAlignment="Top" Width="75" Click="buttonClient_Click"/>
-        <TextBox x:Name="textBox_Copy" HorizontalAlignment="Left" Height="23" Margin="260,50,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="100"/>
-        <Viewbox x:Name="vb1" StretchDirection="Both" Stretch="Uniform" Margin="40,57,377,162" Height="100" Width="100">
+        <TextBox x:Name="leftCompIPTB" HorizontalAlignment="Left" Height="23" Margin="98,89,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="89"/>
+        <Button x:Name="buttonHost" Content="Hostuj" HorizontalAlignment="Left" Margin="218,181,0,0" VerticalAlignment="Top" Width="75" Click="buttonHost_Click"/>
+        <Button x:Name="buttonClientLeft" Content="Połącz" HorizontalAlignment="Left" Margin="106,181,0,0" VerticalAlignment="Top" Width="75" Click="buttonClientLeft_Click"/>
+        <TextBox x:Name="rightCompIPTB" HorizontalAlignment="Left" Height="23" Margin="318,89,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="88"/>
+        <Viewbox x:Name="vb1" StretchDirection="Both" Stretch="Uniform" Margin="98,96,319,123" Height="100" Width="100">
             <custom:Komputer x:Name="computer1"/>
         </Viewbox>
-        <Viewbox x:Name="vb3" StretchDirection="Both" Stretch="Uniform" Margin="260,57,157,162" Height="100" Width="100">
+        <Viewbox x:Name="vb3" StretchDirection="Both" Stretch="Uniform" Margin="318,96,99,123" Height="100" Width="100">
             <custom:Komputer x:Name="computer2"/>
         </Viewbox>
-        <Viewbox x:Name="vb2" StretchDirection="Both" Stretch="Uniform" Margin="150,57,267,162" Height="100" Width="100">
+        <Viewbox x:Name="vb2" StretchDirection="Both" Stretch="Uniform" Margin="208,96,209,123" Height="100" Width="100">
             <custom:Komputer x:Name="hostComputer"/>
         </Viewbox>
-        <Label x:Name="bottomLabel" Content="Połączenie nie zostało nawiązane." HorizontalAlignment="Left" Margin="280,264,0,0" VerticalAlignment="Top" Width="184"/>
+        <Label x:Name="bottomLabel" Content="Połączenie nie zostało nawiązane." HorizontalAlignment="Left" Margin="222,221,0,0" VerticalAlignment="Top" Width="184"/>
+        <Label x:Name="localIPLabel" Content="Label" HorizontalAlignment="Left" Margin="218,89,0,0" VerticalAlignment="Top" Height="23" Width="75"/>
+        <Button x:Name="buttonClientRight" Content="Połącz" HorizontalAlignment="Left" Margin="331,181,0,0" VerticalAlignment="Top" Width="75" Click="buttonClientRight_Click"/>
     </Grid>
 </Window>
