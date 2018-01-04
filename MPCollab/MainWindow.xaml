@@ -6,23 +6,33 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MPCollab"
         mc:Ignorable="d"
-        Title="MPCollab" Height="350" Width="525" WindowStartupLocation="CenterScreen" KeyDown="MainWin_KeyDown" MouseMove="MainWin_MouseMove" MouseLeftButtonDown="MainWin_MouseLeftButtonDown" MouseRightButtonDown="MainWin_MouseRightButtonDown">
+        Title="MPCollab" Height="219.911" Width="359.292" WindowStartupLocation="CenterScreen" KeyDown="MainWin_KeyDown" MouseMove="MainWin_MouseMove" MouseLeftButtonDown="MainWin_MouseLeftButtonDown" MouseRightButtonDown="MainWin_MouseRightButtonDown" SizeToContent="WidthAndHeight"
+        MinHeight="230"
+        MinWidth="365"
+        >
+    <Window.Background>
+        <ImageBrush AlignmentY="Top" ImageSource="/Resources/always_grey12.png" TileMode="FlipY" Stretch="Uniform"  Viewport="0,0,16,16" ViewportUnits="Absolute"/>
+    </Window.Background>
     <Grid>
-        <TextBox x:Name="leftCompIPTB" HorizontalAlignment="Left" Height="23" Margin="98,89,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="89"/>
-        <Button x:Name="buttonHost" Content="Hostuj" HorizontalAlignment="Left" Margin="218,181,0,0" VerticalAlignment="Top" Width="75" Click="buttonHost_Click"/>
-        <Button x:Name="buttonClientLeft" Content="Połącz" HorizontalAlignment="Left" Margin="106,181,0,0" VerticalAlignment="Top" Width="75" Click="buttonClientLeft_Click"/>
-        <TextBox x:Name="rightCompIPTB" HorizontalAlignment="Left" Height="23" Margin="318,89,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="88"/>
-        <Viewbox x:Name="vb1" Margin="98,117,0,0" Height="100" Width="100" VerticalAlignment="Top" HorizontalAlignment="Left">
+        <TextBox x:Name="leftCompIPTB" HorizontalAlignment="Left" Height="16" Margin="18,21,0,162" TextWrapping="Wrap" Text="" VerticalAlignment="Center" Width="89" Background="White"/>
+        <Button x:Name="buttonHost" Content="Hostuj" Margin="135,103,141,59" VerticalAlignment="Center" Width="75" Click="buttonHost_Click" Background="White"/>
+        <Button x:Name="buttonClientLeft" Content="Połącz" HorizontalAlignment="Left" Margin="24,103,0,59" VerticalAlignment="Center" Width="75" Click="buttonClientLeft_Click" Background="White"/>
+        <TextBox x:Name="rightCompIPTB" HorizontalAlignment="Right" Height="16" Margin="0,21,21,162" TextWrapping="Wrap" Text="" VerticalAlignment="Center" Width="88" Background="White"/>
+        <Viewbox x:Name="vb1" Margin="17,39,0,73" Height="70" Width="100" VerticalAlignment="Center" HorizontalAlignment="Left">
             <custom:Komputer x:Name="computer1"/>
         </Viewbox>
-        <Viewbox x:Name="vb3" StretchDirection="Both" Stretch="Uniform" Margin="318,117,0,0" Height="100" Width="100" HorizontalAlignment="Left" VerticalAlignment="Top">
+        <Viewbox x:Name="vb3" StretchDirection="Both" Stretch="Uniform" Margin="0,39,10,73" Height="70" Width="100" HorizontalAlignment="Right" VerticalAlignment="Center">
             <custom:Komputer x:Name="computer2"/>
         </Viewbox>
-        <Viewbox x:Name="vb2" StretchDirection="Both" Stretch="Uniform" Margin="208,117,0,0" Height="100" Width="100" HorizontalAlignment="Left" VerticalAlignment="Top">
+        <Viewbox x:Name="vb2" StretchDirection="Both" Stretch="Uniform" Margin="128,39,123,72" Height="71" Width="100" VerticalAlignment="Center">
             <custom:Komputer x:Name="hostComputer"/>
         </Viewbox>
-        <Label x:Name="bottomLabel" Content="Połączenie nie zostało nawiązane." HorizontalAlignment="Left" Margin="222,221,0,0" VerticalAlignment="Top" Width="184"/>
-        <Label x:Name="localIPLabel" Content="Label" HorizontalAlignment="Left" Margin="208,89,0,0" VerticalAlignment="Top" Height="23" Width="100"/>
-        <Button x:Name="buttonClientRight" Content="Połącz" HorizontalAlignment="Left" Margin="331,181,0,0" VerticalAlignment="Top" Width="75" Click="buttonClientRight_Click"/>
+        <Label x:Name="bottomLabel" Content="Połączenie nie zostało nawiązane." HorizontalAlignment="Right" VerticalAlignment="Bottom" Width="184" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Margin="0,0,10,10" Foreground="White"/>
+        <Label x:Name="localIPLabel" Content="Label" HorizontalAlignment="Center" Margin="133,17,138,159" VerticalAlignment="Center" Height="23" Width="86" FontWeight="SemiBold" Foreground="White" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
+            <Label.Background>
+                <ImageBrush/>
+            </Label.Background>
+        </Label>
+        <Button x:Name="buttonClientRight" Content="Połącz" HorizontalAlignment="Right" Margin="0,103,28,59" VerticalAlignment="Center" Width="75" Click="buttonClientRight_Click" Background="White"/>
     </Grid>
 </Window>
