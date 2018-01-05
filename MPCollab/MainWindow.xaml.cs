@@ -199,7 +199,7 @@ namespace MPCollab
         {
             if (ValidateTextBoxIP(tb, true))
             {
-                tb.IsEnabled = true;
+                but.IsEnabled = true;
                 ipNode.Value = tb.Text;
                 confFile.Save(confPath);
             }
