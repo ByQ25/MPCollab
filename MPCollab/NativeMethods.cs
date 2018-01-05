@@ -29,6 +29,6 @@ namespace MPCollab
         };
 
         [DllImport("user32.dll", SetLastError = true)]
-        internal static extern void keybd_event(byte bVk, byte bScan, int dwFlags, int dwExtraInfo);
+        internal static extern void keybd_event(byte bVk, byte bScan, int dwFlags, IntPtr dwExtraInfo);
     }
 }
