@@ -22,6 +22,7 @@ namespace MPCollab
         private DTO currentDiffs;
         private ClipboardManagerImpl clipboard;
         private int timeWin;
+        private string clientIP;
         private bool disposed, runServer, switchCursors, hostOrClient, clickLMB, clickRMB, paste;
         private object threadLock1, threadLock2, threadLock3, threadlock4;
         private const int MOUSEEVENT_K_LEFTDOWN = 0x02;
@@ -34,6 +35,7 @@ namespace MPCollab
         public const int A = 0x41;
         public const int C = 0x43;
         public const int V = 0x56;
+        internal string ClientIP { get; }
 
         //Events:
         public delegate void CollabEvent();
@@ -56,24 +58,11 @@ namespace MPCollab
             this.stoper1 = new Stopwatch();
             this.stoper2 = new Stopwatch();
             this.clipboard = new ClipboardManagerImpl(new DataObject());
-            //mCursor2Pos = PointToScreen(Mouse.GetPosition(this));
             mHostCursor1Pos = mCursor2Pos = GetMousePosition();
             screenCenter = new Point((int)SystemParameters.PrimaryScreenWidth / 2, (int)SystemParameters.PrimaryScreenHeight / 2);
-            //mainSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
+            if (this.hostOrClient) this.serverSocket = new TcpListener(IPAddress.Parse(ip), 6656);
+            else this.clientSocket = new TcpClient(ip, 6656);
             this.bFormatter = new BinaryFormatter();
-            if (hostOrClient)
-            {
-                this.serverSocket = new TcpListener(IPAddress.Parse(ip), 6656);
-                this.serverSocket.Start();
-                this.clientSocket = serverSocket.AcceptTcpClient();
-            }
-            else
-            {
-                this.clientSocket = new TcpClient(ip, 6656);
-                NativeMethods.SetCursorPos((int)screenCenter.X, (int)screenCenter.Y);
-            }
-            this.bReader = new BinaryReader(clientSocket.GetStream());
-            this.bWriter = new BinaryWriter(clientSocket.GetStream());
         }
 
         public static Point GetMousePosition()
@@ -124,6 +113,19 @@ namespace MPCollab
         }
 
         // Entry point for GUI or other calling class:
+        public void MakeConnection()
+        {
+            if (this.hostOrClient)
+            {
+                this.serverSocket.Start();
+                this.clientSocket = serverSocket.AcceptTcpClient();
+                this.clientIP = clientSocket.Client.RemoteEndPoint.ToString();
+            }
+            else NativeMethods.SetCursorPos((int)screenCenter.X, (int)screenCenter.Y);
+            this.bReader = new BinaryReader(clientSocket.GetStream());
+            this.bWriter = new BinaryWriter(clientSocket.GetStream());
+        }
+        
         public void StartServer()
         {
             if (!this.runServer)
@@ -134,6 +136,7 @@ namespace MPCollab
                 serverRunner = new Thread(RunServer);
                 serverRunner.IsBackground = true;
                 serverRunner.Start();
+                //TODO: Delete three lines below if they aren't useful
                 //pasteChecker = new Thread(Paste);
                 //pasteChecker.IsBackground = true;
                 //pasteChecker.Start();

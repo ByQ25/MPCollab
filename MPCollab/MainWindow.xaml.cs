@@ -1,12 +1,16 @@
 ﻿using System;
+using System.Linq;
+using System.Xml.Linq;
+using System.Threading;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
-using System.Windows.Controls;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Input;
-using System.Linq;
-using System.Xml.Linq;
+using System.Windows.Controls;
+using System.Windows.Threading;
+
 
 namespace MPCollab
 {
@@ -16,9 +20,11 @@ namespace MPCollab
     // TODO: Let's consider an option of installing dll embedding package: Install-Package Costura.Fody
     public partial class MainWindow : Window, IDisposable
     {
-        private TwoCursorsHandler TCH;
-        private XDocument confFile;
+        private Thread connMaker;
         private XElement leftCompIP, rightCompIP;
+        private XDocument confFile;
+        private DispatcherTimer mainTimer;
+        private TwoCursorsHandler TCH;
         private bool disposed, hostOrClient; // true - host, false - client
         private const int timeWin = 17;
         private const string confPath = "config.xml";
@@ -65,6 +71,9 @@ namespace MPCollab
             CommandBindings.Add(new CommandBinding(newCmd, ControlVExecuted));
 
             disposed = false;
+            mainTimer = new DispatcherTimer();
+            mainTimer.Interval = new TimeSpan(0,0,1);
+            mainTimer.Tick += mainTimer_Tick;
 
             try { this.localIPLabel.Content = GetLocalIPAddress(); }
             catch (ApplicationException) { }
@@ -84,10 +93,9 @@ namespace MPCollab
             hostOrClient = true;
             if (TCH == null) TCH = new TwoCursorsHandler(localIPLabel.Content.ToString(), timeWin, hostOrClient);
             TCH.StartServer();
-            bottomLabel.Content = "Połączenie zosało nawiązane.";
+            connMaker = new Thread(TCH.MakeConnection);
+            connMaker.Start();
             TCH.OnPushClipboard += TCH.Paste;
-            // TODO: Server should blink on computers that connected, not always left and center.
-            StartBlinking((Komputer)vb1.Child,(Komputer)vb2.Child); 
         }
 
         private void ClientSideProcedure(byte computerTag)
@@ -105,17 +113,20 @@ namespace MPCollab
 
                 hostOrClient = false;
                 DisableWindowControls();
+                List<Komputer> comps = new List<Komputer>();
+                comps.Add((Komputer)vb2.Child);
                 switch (computerTag)
                 {
                     case 0:
                         TCH = new TwoCursorsHandler(leftCompIPTB.Text, timeWin, hostOrClient);
-                        StartBlinking((Komputer)vb1.Child, (Komputer)vb2.Child);
+                        comps.Add((Komputer)vb1.Child);
                         break;
                     case 1:
                         TCH = new TwoCursorsHandler(rightCompIPTB.Text, timeWin, hostOrClient);
-                        StartBlinking((Komputer)vb2.Child, (Komputer)vb3.Child);
+                        comps.Add((Komputer)vb3.Child);
                         break;
                 }
+                StartBlinking(comps);
             }
         }
 
@@ -247,6 +258,26 @@ namespace MPCollab
             if (TCH != null) TCH.HandleMouseClick(TwoCursorsHandler.MButtons.RMB);
         }
 
+        private void mainTimer_Tick(object sender, EventArgs e)
+        {
+            if (connMaker != null && !connMaker.IsAlive)
+            {
+                bottomLabel.Content = "Połączenie zosało nawiązane.";
+                if (hostOrClient)
+                {
+                    string clientIP = TCH.ClientIP;
+                    List<Komputer> comps = new List<Komputer>();
+                    comps.Add((Komputer)vb2.Child);
+                    if (TCH.ClientIP == leftCompIP.Value)
+                        comps.Add((Komputer)vb1.Child);
+                    else if (TCH.ClientIP == rightCompIP.Value)
+                        comps.Add((Komputer)vb3.Child);
+                    StartBlinking(comps);
+                }
+                mainTimer.Stop();   
+            }
+        }
+
         private void ControlCExecuted(object sender, ExecutedRoutedEventArgs e)
         {
             if (TCH != null && !hostOrClient) TCH.HandleCopy();
@@ -262,10 +293,10 @@ namespace MPCollab
             System.Windows.MessageBox.Show("skrót");
         }
 
-        private void StartBlinking(Komputer com1, Komputer com2)
+        private void StartBlinking(List<Komputer> comps)
         {
-            com1.Start();
-            com2.Start();
+            foreach (Komputer comp in comps)
+                comp.Start();
         }
 
         private void StopBlinking(Komputer[] comps)
