@@ -92,9 +92,9 @@ namespace MPCollab
         {
             hostOrClient = true;
             if (TCH == null) TCH = new TwoCursorsHandler(localIPLabel.Content.ToString(), timeWin, hostOrClient);
-            TCH.StartServer();
             connMaker = new Thread(TCH.MakeConnection);
             connMaker.Start();
+            mainTimer.Start();
             TCH.OnPushClipboard += TCH.Paste;
         }
 
@@ -273,6 +273,7 @@ namespace MPCollab
                     else if (TCH.ClientIP == rightCompIP.Value)
                         comps.Add((Komputer)vb3.Child);
                     StartBlinking(comps);
+                    TCH.StartServer();
                 }
                 mainTimer.Stop();   
             }

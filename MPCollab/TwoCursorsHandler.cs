@@ -316,12 +316,18 @@ namespace MPCollab
                         serverSocket.Stop();
                         serverSocket = null;
                     }
-                    bReader.Close();
-                    bReader.Dispose();
-                    bReader = null;
-                    bWriter.Close();
-                    bWriter.Dispose();
-                    bWriter = null;
+                    if (bReader != null)
+                    {
+                        bReader.Close();
+                        bReader.Dispose();
+                        bReader = null;
+                    }
+                    if (bWriter != null)
+                    {
+                        bWriter.Close();
+                        bWriter.Dispose();
+                        bWriter = null;
+                    }
                     if (curSwitcher != null && curSwitcher.IsAlive)
                     {
                         curSwitcher.Abort();
