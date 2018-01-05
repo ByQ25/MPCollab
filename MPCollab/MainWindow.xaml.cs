@@ -197,7 +197,7 @@ namespace MPCollab
 
         private void ProcessTBIPChange(TextBox tb, Button but, XElement ipNode)
         {
-            if (ValidateTextBoxIP(this.leftCompIPTB, true))
+            if (ValidateTextBoxIP(tb, true))
             {
                 tb.IsEnabled = true;
                 ipNode.Value = tb.Text;
