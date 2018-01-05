@@ -234,6 +234,7 @@ namespace MPCollab
             }
             else throw new TCHException("Received non supported DTO type.");
             bWriter.Flush();
+            // TODO: We should add a try{} catch{} here.
             if (!bReader.ReadBoolean()) throw new TCHException("False acknowledgement received from the server.");
             stoper2.Stop();
             int dt = Convert.ToInt32(stoper2.ElapsedMilliseconds);
