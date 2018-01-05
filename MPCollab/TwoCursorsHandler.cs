@@ -35,7 +35,10 @@ namespace MPCollab
         public const int A = 0x41;
         public const int C = 0x43;
         public const int V = 0x56;
-        internal string ClientIP { get; }
+        internal string ClientIP
+        {
+            get { return clientIP; }
+        }
 
         //Events:
         public delegate void CollabEvent();

@@ -119,10 +119,12 @@ namespace MPCollab
                 {
                     case 0:
                         TCH = new TwoCursorsHandler(leftCompIPTB.Text, timeWin, hostOrClient);
+                        TCH.MakeConnection();
                         comps.Add((Komputer)vb1.Child);
                         break;
                     case 1:
                         TCH = new TwoCursorsHandler(rightCompIPTB.Text, timeWin, hostOrClient);
+                        TCH.MakeConnection();
                         comps.Add((Komputer)vb3.Child);
                         break;
                 }
