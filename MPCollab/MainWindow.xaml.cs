@@ -267,7 +267,7 @@ namespace MPCollab
                 bottomLabel.Content = "Połączenie zosało nawiązane.";
                 if (hostOrClient)
                 {
-                    string clientIP = TCH.ClientIP;
+                    string clientIP = TCH.ClientIP.Split(':')[0];
                     List<Komputer> comps = new List<Komputer>();
                     comps.Add((Komputer)vb2.Child);
                     if (TCH.ClientIP == leftCompIP.Value)
