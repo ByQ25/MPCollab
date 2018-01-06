@@ -270,14 +270,14 @@ namespace MPCollab
                     string clientIP = TCH.ClientIP.Split(':')[0];
                     List<Komputer> comps = new List<Komputer>();
                     comps.Add((Komputer)vb2.Child);
-                    if (TCH.ClientIP == leftCompIP.Value)
+                    if (clientIP == leftCompIP.Value)
                         comps.Add((Komputer)vb1.Child);
-                    else if (TCH.ClientIP == rightCompIP.Value)
+                    else if (clientIP == rightCompIP.Value)
                         comps.Add((Komputer)vb3.Child);
                     StartBlinking(comps);
                     TCH.StartServer();
                 }
-                mainTimer.Stop();   
+                mainTimer.Stop();
             }
         }
 
