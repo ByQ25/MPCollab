@@ -213,9 +213,9 @@ namespace MPCollab
         {
             switch(e.Key)
             {
-                case Key.NumPad1: ServerSideProcedure(); break;
-                case Key.NumPad2: ClientSideProcedure(0); break;
-                case Key.NumPad3: ClientSideProcedure(1); break;
+                case Key.Multiply: ServerSideProcedure(); break;
+                case Key.OemMinus: ClientSideProcedure(0); break;
+                case Key.OemPlus: ClientSideProcedure(1); break;
                 case Key.Escape: RestoreAppToInitialState(); break;
             }
         }
