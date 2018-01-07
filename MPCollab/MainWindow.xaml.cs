@@ -95,7 +95,6 @@ namespace MPCollab
             connMaker = new Thread(TCH.MakeConnection);
             connMaker.Start();
             mainTimer.Start();
-            TCH.OnPushClipboard += TCH.Paste;
         }
 
         private void ClientSideProcedure(byte computerTag)

@@ -40,9 +40,7 @@ namespace MPCollab
             get { return clientIP; }
         }
 
-        //Events:
-        public delegate void CollabEvent();
-        public event CollabEvent OnPushClipboard;
+
 
         public TwoCursorsHandler(string ip, int timeWin, bool hostOrClient)
         {
@@ -281,7 +279,6 @@ namespace MPCollab
         {
             if (bReader != null)
             {
-                OnPushClipboard();
                 clipboard.CopyClipboard();
                 DTOext tmp = (DTOext)bFormatter.Deserialize(bReader.BaseStream);
                 clipboard.ImportDTOext(tmp);
@@ -341,6 +338,11 @@ namespace MPCollab
                         serverRunner.Abort();
                         serverRunner = null;
                     }
+                    //if (pasteChecker != null && pasteChecker.IsAlive)
+                    //{
+                    //    pasteChecker.Abort();
+                    //    pasteChecker = null;
+                    //}
                 }
             }
             this.disposed = true;
