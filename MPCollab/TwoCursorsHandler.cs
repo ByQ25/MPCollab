@@ -20,10 +20,12 @@ namespace MPCollab
         private BinaryFormatter bFormatter;
         private Thread curSwitcher, serverRunner, pasteChecker;
         private DTO currentDiffs;
+        private DTOext receivedClipboard;
         private ClipboardManagerImpl clipboard;
         private int timeWin;
         private string clientIP;
-        private bool disposed, runServer, switchCursors, hostOrClient, clickLMB, clickRMB, paste;
+        private bool disposed, runServer, switchCursors, hostOrClient, clickLMB, clickRMB;
+        public bool paste;
         private object threadLock1, threadLock2, threadLock3, threadlock4;
         private const int MOUSEEVENT_K_LEFTDOWN = 0x02;
         private const int MOUSEEVENT_K_LEFTUP = 0x04;
@@ -39,7 +41,10 @@ namespace MPCollab
         {
             get { return clientIP; }
         }
-
+        public DTOext ReceivedClipboard
+        {
+            get { return receivedClipboard; }
+        }
 
 
         public TwoCursorsHandler(string ip, int timeWin, bool hostOrClient)
@@ -279,11 +284,11 @@ namespace MPCollab
         {
             if (bReader != null)
             {
-                clipboard.CopyClipboard();
-                DTOext tmp = (DTOext)bFormatter.Deserialize(bReader.BaseStream);
-                clipboard.ImportDTOext(tmp);
+                //clipboard.CopyClipboard();
+                receivedClipboard = (DTOext)bFormatter.Deserialize(bReader.BaseStream);
+                //clipboard.ImportDTOext(receivedClipboard);
 
-                if (tmp.Paste)
+                if (receivedClipboard.Paste)
                     lock(threadlock4) { this.paste = true; }
                 
                 bWriter.Write(true);

@@ -20,14 +20,21 @@ namespace MPCollab
     // TODO: Let's consider an option of installing dll embedding package: Install-Package Costura.Fody
     public partial class MainWindow : Window, IDisposable
     {
-        private Thread connMaker;
+        private Thread connMaker, pasteChecker;
         private XElement leftCompIP, rightCompIP;
         private XDocument confFile;
         private DispatcherTimer mainTimer;
         private TwoCursorsHandler TCH;
+        private ClipboardManagerImpl clipboardManager;
+        private DTOext clipboard;
+        private object pasteThreadlock;
         private bool disposed, hostOrClient; // true - host, false - client
         private const int timeWin = 17;
         private const string confPath = "config.xml";
+        public const int KEYEVENTF_EXTENDEDKEY = 0x0001; //Key down flag
+        public const int KEYEVENTF_KEYUP = 0x0002; //Key up flag
+        public const int VK_LCONTROL = 0xA2; //Left Control key code
+        public const int V = 0x56;
 
         public MainWindow()
         {
@@ -75,6 +82,9 @@ namespace MPCollab
             mainTimer.Interval = new TimeSpan(0,0,1);
             mainTimer.Tick += mainTimer_Tick;
 
+            clipboardManager = new ClipboardManagerImpl(new DataObject());
+            this.pasteThreadlock = new object();
+
             try { this.localIPLabel.Content = GetLocalIPAddress(); }
             catch (ApplicationException) { }
         }
@@ -93,8 +103,10 @@ namespace MPCollab
             hostOrClient = true;
             if (TCH == null) TCH = new TwoCursorsHandler(localIPLabel.Content.ToString(), timeWin, hostOrClient);
             connMaker = new Thread(TCH.MakeConnection);
+            pasteChecker = new Thread(CheckPaste);
             connMaker.Start();
             mainTimer.Start();
+            pasteChecker.Start();
         }
 
         private void ClientSideProcedure(byte computerTag)
@@ -205,6 +217,22 @@ namespace MPCollab
                 confFile.Save(confPath);
             }
             else but.IsEnabled = false;
+        }
+
+        private void CheckPaste()
+        {
+            if (TCH.paste && hostOrClient)
+            {
+                clipboardManager.CopyClipboard();
+                clipboard = TCH.ReceivedClipboard;
+                clipboardManager.ImportDTOext(clipboard);
+
+                NativeMethods.keybd_event(VK_LCONTROL, 0, KEYEVENTF_EXTENDEDKEY, (IntPtr)0);
+                NativeMethods.keybd_event(V, 0, KEYEVENTF_EXTENDEDKEY, (IntPtr)0);
+                NativeMethods.keybd_event(V, 0, KEYEVENTF_KEYUP, (IntPtr)0);
+                NativeMethods.keybd_event(VK_LCONTROL, 0, KEYEVENTF_KEYUP, (IntPtr)0);
+                lock (pasteThreadlock) { TCH.paste = false; }
+            }
         }
 
         // Events handling:
