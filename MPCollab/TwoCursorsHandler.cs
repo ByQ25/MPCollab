@@ -132,7 +132,7 @@ namespace MPCollab
             {
                 this.serverSocket.Start();
                 while (!serverSocket.Pending()) Thread.Sleep(500);
-                serverSocket.AcceptTcpClient();
+                this.clientSocket = serverSocket.AcceptTcpClient();
                 this.clientIP = clientSocket.Client.RemoteEndPoint.ToString();
                 this.connEstablished = true;
             }
