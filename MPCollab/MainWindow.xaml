@@ -35,6 +35,6 @@
         </Label>
         <Button x:Name="buttonClientRight" Content="Połącz" HorizontalAlignment="Right" Margin="0,103,28,59" VerticalAlignment="Center" Width="75" Click="buttonClientRight_Click" Background="White" IsEnabled="False" ToolTip="Kliknij, by połączyć się z komputerem po prawej stronie."/>
         <Label x:Name="backgroundLabel" Content="Background pattern from Subtle Patterns" HorizontalAlignment="Left" Margin="-3,186,0,-4" VerticalAlignment="Bottom" Foreground="#FF898989" FontSize="6" Height="17" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
-        <CheckBox x:Name="edgesConnCB" Content="Łącz na krawędziach ekranu" HorizontalAlignment="Left" Margin="13,153,0,0" VerticalAlignment="Top" IsChecked="True" Click="edgesConnCB_Click"/>
+        <CheckBox x:Name="edgesConnCB" Content="Łącz na krawędziach ekranu" HorizontalAlignment="Left" Margin="17,0,0,41" VerticalAlignment="Bottom" IsChecked="True" Click="edgesConnCB_Click"/>
     </Grid>
 </Window>

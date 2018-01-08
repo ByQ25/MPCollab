@@ -244,6 +244,7 @@ namespace MPCollab
             }
         }
 
+        //TODO: Do we want to extract 4-5 methods below to separate module?
         private void SendDTO(BinaryReader bReader, BinaryWriter bWriter, object dto)
         {
             stoper2.Reset();

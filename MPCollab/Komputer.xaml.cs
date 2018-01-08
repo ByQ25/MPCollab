@@ -1,17 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace MPCollab
 {
@@ -21,17 +11,18 @@ namespace MPCollab
     public partial class Komputer : UserControl
     {
         private bool OrangeOrWhite;
-        System.Windows.Threading.DispatcherTimer dispatcherTimer = new System.Windows.Threading.DispatcherTimer();
+        private Random rand;
+        private System.Windows.Threading.DispatcherTimer dispatcherTimer;
+
         public Komputer()
         {
             InitializeComponent();
 
             rect1.Fill = new SolidColorBrush(Colors.White);
-            //System.Windows.Threading.DispatcherTimer dispatcherTimer = new System.Windows.Threading.DispatcherTimer();
+            rand = new Random();
+            dispatcherTimer = new System.Windows.Threading.DispatcherTimer();
             dispatcherTimer.Tick += new EventHandler(dispatcherTimer_Tick);
             dispatcherTimer.Interval = new TimeSpan(0, 0, 1);
-            
-            
         }
 
         private void Rectangle_Loaded(object sender, RoutedEventArgs e)
@@ -43,16 +34,16 @@ namespace MPCollab
         {
             dispatcherTimer.Start();
             OrangeOrWhite = false;
-
         }
+
         public void Stop()
         {
             dispatcherTimer.Stop();
             rect1.Fill = new SolidColorBrush(Colors.White);
         }
+
         private void dispatcherTimer_Tick(object sender, EventArgs e)
         {
-
             if (OrangeOrWhite)
             {
                 rect1.Fill = new SolidColorBrush(Colors.Orange);
@@ -63,9 +54,9 @@ namespace MPCollab
                 rect1.Fill = new SolidColorBrush(Colors.White);
                 OrangeOrWhite = true;
             }
-            
-            
+            dispatcherTimer.Stop();
+            dispatcherTimer.Interval = new TimeSpan(0, 0, 0, 0, rand.Next(500, 4001));
+            dispatcherTimer.Start();
         }
-
     }
 }

@@ -201,7 +201,7 @@ namespace MPCollab
 
         private void RestoreAppToInitialState(string message, bool doWait)
         {
-            if (doWait) Thread.Sleep(1000);
+            if (doWait) Thread.Sleep(2000);
             if (TCH != null)
             {
                 TCH.StopServer();
@@ -298,6 +298,7 @@ namespace MPCollab
                 case Key.OemPlus: ClientSideProcedure(1); break;
                 case Key.Escape:
                     bottomLabel.Content = "Połączenie zosało zakończone.";
+                    bottomLabel.InvalidateVisual();
                     RestoreAppToInitialState("Serwer został uruchomiony.", true);
                     break;
             }
