@@ -48,7 +48,7 @@ namespace MPCollab
         {
             get { return receivedClipboard; }
         }
-        public bool Paste
+        public bool PasteField
         {
             get { return paste; }
             set { this.paste = value; }

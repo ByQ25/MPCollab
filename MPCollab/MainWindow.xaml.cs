@@ -20,15 +20,15 @@ namespace MPCollab
     // TODO: Let's consider an option of installing dll embedding package: Install-Package Costura.Fody
     public partial class MainWindow : Window, IDisposable
     {
+        private DTOext clipboard;
         private Thread connMaker, pasteChecker;
         private XElement leftCompIP, rightCompIP;
         private XDocument confFile;
         private DispatcherTimer mainTimer, edgeCheckerTimer;
         private TwoCursorsHandler TCH;
         private ClipboardManagerImpl clipboardManager;
-        private DTOext clipboard;
-        private object pasteThreadlock;
         private NativeMethods.Win32Point w32MousePos;
+        private object pasteThreadlock;
         private bool disposed, hostOrClient; // true - host, false - client
         private const int timeWin = 17;
         private const string confPath = "config.xml";
@@ -84,13 +84,14 @@ namespace MPCollab
             edgeCheckerTimer.Tick += edgeCheckerTimer_Tick;
 
             w32MousePos = new NativeMethods.Win32Point();
-            RestoreAppToInitialState("");
             clipboardManager = new ClipboardManagerImpl(new DataObject());
-            this.pasteThreadlock = new object();
-            try { this.localIPLabel.Content = GetLocalIPAddress(); }
+            RestoreAppToInitialState("");
+            pasteThreadlock = new object();
+
+            try { localIPLabel.Content = GetLocalIPAddress(); }
             catch (ApplicationException) { }
             //Starting server service on the app load.
-            if (this.localIPLabel.Content.ToString() != null) ServerSideProcedure();
+            if (localIPLabel.Content.ToString() != null) ServerSideProcedure();
         }
 
         // Additional methods:
@@ -259,7 +260,7 @@ namespace MPCollab
 
         private void CheckPaste()
         {
-            if (TCH.Paste && hostOrClient)
+            if (TCH.PasteField && hostOrClient)
             {
                 clipboardManager.CopyClipboard();
                 clipboard = TCH.ReceivedClipboard;
@@ -269,7 +270,7 @@ namespace MPCollab
                 NativeMethods.keybd_event(V, 0, KEYEVENTF_EXTENDEDKEY, (IntPtr)0);
                 NativeMethods.keybd_event(V, 0, KEYEVENTF_KEYUP, (IntPtr)0);
                 NativeMethods.keybd_event(VK_LCONTROL, 0, KEYEVENTF_KEYUP, (IntPtr)0);
-                lock (pasteThreadlock) { TCH.Paste = false; }
+                lock (pasteThreadlock) { TCH.PasteField = false; }
             }
         }
 
