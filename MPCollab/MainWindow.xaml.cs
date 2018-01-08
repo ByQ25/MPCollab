@@ -20,15 +20,22 @@ namespace MPCollab
     // TODO: Let's consider an option of installing dll embedding package: Install-Package Costura.Fody
     public partial class MainWindow : Window, IDisposable
     {
-        private Thread connMaker;
+        private Thread connMaker, pasteChecker;
         private XElement leftCompIP, rightCompIP;
         private XDocument confFile;
         private DispatcherTimer mainTimer, edgeCheckerTimer;
         private TwoCursorsHandler TCH;
+        private ClipboardManagerImpl clipboardManager;
+        private DTOext clipboard;
+        private object pasteThreadlock;
         private NativeMethods.Win32Point w32MousePos;
         private bool disposed, hostOrClient; // true - host, false - client
         private const int timeWin = 17;
         private const string confPath = "config.xml";
+        public const int KEYEVENTF_EXTENDEDKEY = 0x0001; //Key down flag
+        public const int KEYEVENTF_KEYUP = 0x0002; //Key up flag
+        public const int VK_LCONTROL = 0xA2; //Left Control key code
+        public const int V = 0x56;
 
         public MainWindow()
         {
@@ -67,8 +74,7 @@ namespace MPCollab
             newCmd.InputGestures.Add(new KeyGesture(System.Windows.Input.Key.V, ModifierKeys.Control));
             CommandBindings.Add(new CommandBinding(newCmd, ControlVExecuted));
 
-            //TODO: Restore app and Main Win Initializer method should be merged
-
+            disposed = false;
             mainTimer = new DispatcherTimer();
             mainTimer.Interval = new TimeSpan(0,0,1);
             mainTimer.Tick += mainTimer_Tick;
@@ -79,9 +85,10 @@ namespace MPCollab
 
             w32MousePos = new NativeMethods.Win32Point();
             RestoreAppToInitialState("");
+            clipboardManager = new ClipboardManagerImpl(new DataObject());
+            this.pasteThreadlock = new object();
             try { this.localIPLabel.Content = GetLocalIPAddress(); }
             catch (ApplicationException) { }
-
             //Starting server service on the app load.
             if (this.localIPLabel.Content.ToString() != null) ServerSideProcedure();
         }
@@ -113,9 +120,10 @@ namespace MPCollab
             connMaker = new Thread(TCH.MakeConnection);
             connMaker.IsBackground = true;
             connMaker.Start();
+
+            pasteChecker = new Thread(CheckPaste);
+            pasteChecker.Start();
             mainTimer.Start();
-            TCH.OnPushClipboard += TCH.Paste;
-            this.bottomLabel.Content = "Serwer został uruchomiony.";
         }
 
         private void ClientSideProcedure(byte computerTag)
@@ -247,6 +255,22 @@ namespace MPCollab
                 confFile.Save(confPath);
             }
             else but.IsEnabled = false;
+        }
+
+        private void CheckPaste()
+        {
+            if (TCH.Paste && hostOrClient)
+            {
+                clipboardManager.CopyClipboard();
+                clipboard = TCH.ReceivedClipboard;
+                clipboardManager.ImportDTOext(clipboard);
+
+                NativeMethods.keybd_event(VK_LCONTROL, 0, KEYEVENTF_EXTENDEDKEY, (IntPtr)0);
+                NativeMethods.keybd_event(V, 0, KEYEVENTF_EXTENDEDKEY, (IntPtr)0);
+                NativeMethods.keybd_event(V, 0, KEYEVENTF_KEYUP, (IntPtr)0);
+                NativeMethods.keybd_event(VK_LCONTROL, 0, KEYEVENTF_KEYUP, (IntPtr)0);
+                lock (pasteThreadlock) { TCH.Paste = false; }
+            }
         }
 
         // Events handling:

@@ -20,6 +20,7 @@ namespace MPCollab
         private BinaryFormatter bFormatter;
         private Thread curSwitcher, serverRunner, pasteChecker;
         private DTO currentDiffs;
+        private DTOext receivedClipboard;
         private ClipboardManagerImpl clipboard;
         private int timeWin;
         private string clientIP;
@@ -43,10 +44,15 @@ namespace MPCollab
         {
             get { return connEstablished; }
         }
-
-        //Events:
-        public delegate void CollabEvent();
-        public event CollabEvent OnPushClipboard;
+        public DTOext ReceivedClipboard
+        {
+            get { return receivedClipboard; }
+        }
+        public bool Paste
+        {
+            get { return paste; }
+            set { this.paste = value; }
+        }
 
         public TwoCursorsHandler(string ip, int timeWin, bool hostOrClient)
         {
@@ -296,12 +302,12 @@ namespace MPCollab
         {
             if (bReader != null)
             {
-                OnPushClipboard();
-                clipboard.CopyClipboard();
-                DTOext tmp = (DTOext)bFormatter.Deserialize(bReader.BaseStream);
-                clipboard.ImportDTOext(tmp);
+                // TODO: Remove below commented lines if unnecessary.
+                //clipboard.CopyClipboard();
+                receivedClipboard = (DTOext)bFormatter.Deserialize(bReader.BaseStream);
+                //clipboard.ImportDTOext(receivedClipboard);
 
-                if (tmp.Paste)
+                if (receivedClipboard.Paste)
                     lock(threadlock4) { this.paste = true; }
                 
                 bWriter.Write(true);
@@ -359,6 +365,12 @@ namespace MPCollab
                         serverRunner.Abort();
                         serverRunner = null;
                     }
+                    // TODO: Remove commented lines if unnecessary.
+                    //if (pasteChecker != null && pasteChecker.IsAlive)
+                    //{
+                    //    pasteChecker.Abort();
+                    //    pasteChecker = null;
+                    //}
                 }
             }
             this.disposed = true;
