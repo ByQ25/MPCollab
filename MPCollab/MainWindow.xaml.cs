@@ -374,11 +374,15 @@ namespace MPCollab
             NativeMethods.GetCursorPos(ref w32MousePos);
             if (w32MousePos.X == 0 && buttonClientLeft.IsEnabled)
             {
+                this.WindowState = WindowState.Normal;
+                this.Topmost = true;
                 ClientSideProcedure(0);
                 edgeCheckerTimer.Stop();
             }
             else if (w32MousePos.X == SystemParameters.PrimaryScreenWidth - 1 && buttonClientRight.IsEnabled)
             {
+                this.WindowState = WindowState.Normal;
+                this.Topmost = true;
                 ClientSideProcedure(1);
                 edgeCheckerTimer.Stop();
             }
