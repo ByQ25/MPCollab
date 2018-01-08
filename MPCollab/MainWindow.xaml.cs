@@ -85,13 +85,11 @@ namespace MPCollab
 
             w32MousePos = new NativeMethods.Win32Point();
             clipboardManager = new ClipboardManagerImpl(new DataObject());
-            RestoreAppToInitialState("");
             pasteThreadlock = new object();
 
             try { localIPLabel.Content = GetLocalIPAddress(); }
             catch (ApplicationException) { }
-            //Starting server service on the app load.
-            if (localIPLabel.Content.ToString() != null) ServerSideProcedure();
+            RestoreAppToInitialState("Serwer został uruchomiony.", false);
         }
 
         // Additional methods:
@@ -199,8 +197,9 @@ namespace MPCollab
             Mouse.OverrideCursor = Cursors.Arrow;
         }
 
-        private void RestoreAppToInitialState(string message)
+        private void RestoreAppToInitialState(string message, bool doWait)
         {
+            if (doWait) Thread.Sleep(1000);
             if (TCH != null)
             {
                 TCH.StopServer();
@@ -214,7 +213,8 @@ namespace MPCollab
             Komputer[] comps = { (Komputer)vb1.Child, (Komputer)vb2.Child, (Komputer)vb3.Child };
             StopBlinking(comps);
             bottomLabel.Content = message;
-            edgeCheckerTimer.Start();
+            if ((bool)this.edgesConnCB.IsChecked) edgeCheckerTimer.Start();
+            if (localIPLabel.Content.ToString() != null) ServerSideProcedure();
         }
 
         private void CreateNewConfigXmlDoc(bool save)
@@ -274,6 +274,18 @@ namespace MPCollab
             }
         }
 
+        private void StartBlinking(List<Komputer> comps)
+        {
+            foreach (Komputer comp in comps)
+                comp.Start();
+        }
+
+        private void StopBlinking(Komputer[] comps)
+        {
+            foreach (Komputer comp in comps)
+                comp.Stop();
+        }
+
         // Events handling:
         private void MainWin_KeyDown(object sender, KeyEventArgs e)
         {
@@ -282,7 +294,10 @@ namespace MPCollab
                 case Key.Multiply: ServerSideProcedure(); break;
                 case Key.OemMinus: ClientSideProcedure(0); break;
                 case Key.OemPlus: ClientSideProcedure(1); break;
-                case Key.Escape: RestoreAppToInitialState("Połączenie zosało zakończone."); break;
+                case Key.Escape:
+                    bottomLabel.Content = "Połączenie zosało zakończone.";
+                    RestoreAppToInitialState("Serwer został uruchomiony.", true);
+                    break;
             }
         }
 
@@ -347,7 +362,7 @@ namespace MPCollab
                     }
                     mainTimer.Stop();
                 }
-                else RestoreAppToInitialState("Serwer nie odpowiada.");
+                else RestoreAppToInitialState("Serwer nie odpowiada.", false);
                 connMaker = null;
             }
         }
@@ -367,6 +382,15 @@ namespace MPCollab
             }
         }
 
+        private void edgesConnCB_Click(object sender, RoutedEventArgs e)
+        {
+            switch (edgesConnCB.IsChecked)
+            {
+                case false: edgeCheckerTimer.Stop(); break;
+                case true: edgeCheckerTimer.Start(); break;
+            }
+        }
+
         private void ControlCExecuted(object sender, ExecutedRoutedEventArgs e)
         {
             if (TCH != null && !hostOrClient) TCH.HandleCopy();
@@ -380,18 +404,6 @@ namespace MPCollab
         private void ControlSExecuted(object sender, ExecutedRoutedEventArgs e)
         {
             System.Windows.MessageBox.Show("skrót");
-        }
-
-        private void StartBlinking(List<Komputer> comps)
-        {
-            foreach (Komputer comp in comps)
-                comp.Start();
-        }
-
-        private void StopBlinking(Komputer[] comps)
-        {
-            foreach (Komputer comp in comps)
-                comp.Stop();
         }
 
         // IDisposable implementation:
