@@ -268,7 +268,7 @@ namespace MPCollab
         [STAThread]
         private void CheckPaste()
         {
-            while (hostOrClient)
+            while (hostOrClient && TCH != null)
             {
                 if (TCH.PasteField)
                 {
