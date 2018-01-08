@@ -64,7 +64,7 @@ namespace MPCollab
         {
             if (bitmap == null)
             {
-                return "bnVsbA==";
+                return "";
             }
             var encoder = new PngBitmapEncoder();
             var frame = BitmapFrame.Create(bitmap);
@@ -78,6 +78,10 @@ namespace MPCollab
 
         BitmapSource Base64ToImage(string base64)
         {
+            if (base64 == "")
+            {
+                return null;
+            }
             byte[] bytes = Convert.FromBase64String(base64);
             using (var stream = new MemoryStream(bytes))
             {

@@ -151,8 +151,8 @@ namespace MPCollab
                 System.Drawing.Rectangle r = new System.Drawing.Rectangle(
                     (int)lockingRect.X,
                     (int)lockingRect.Y,
-                    (int)(lockingRect.X + this.Width - 8 * SystemParameters.BorderWidth),
-                    (int)(lockingRect.Y + this.Height - 1.5 * SystemParameters.WindowCaptionHeight));
+                    (int)(lockingRect.X + this.Width - 9 * SystemParameters.BorderWidth),
+                    (int)(lockingRect.Y + this.Height - 1.7 * SystemParameters.WindowCaptionHeight));
                 NativeMethods.ClipCursor(ref r);
 
                 hostOrClient = false;
