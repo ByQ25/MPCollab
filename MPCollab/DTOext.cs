@@ -40,7 +40,7 @@ namespace MPCollab
             this.fileDropList = (StringCollection)info.GetValue("FileDropList", typeof(StringCollection));
             this.image = new BitmapImage();
             this.paste = info.GetBoolean("Paste");
-            this.image = Base64ToImage(info.GetString("Image");
+            this.image = Base64ToImage(info.GetString("Image"));
         }
 
         public MemoryStream Audio { get { return audio; } }
