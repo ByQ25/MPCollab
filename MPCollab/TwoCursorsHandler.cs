@@ -23,7 +23,7 @@ namespace MPCollab
         private ClipboardManagerImpl clipboard;
         private int timeWin;
         private string clientIP;
-        private bool disposed, runServer, switchCursors, hostOrClient, clickLMB, clickRMB, paste;
+        private bool disposed, runServer, switchCursors, hostOrClient, clickLMB, clickRMB, paste, connEstablished;
         private object threadLock1, threadLock2, threadLock3, threadlock4;
         private const int MOUSEEVENT_K_LEFTDOWN = 0x02;
         private const int MOUSEEVENT_K_LEFTUP = 0x04;
@@ -38,6 +38,10 @@ namespace MPCollab
         internal string ClientIP
         {
             get { return clientIP; }
+        }
+        internal bool ConnectionEstablished
+        {
+            get { return connEstablished; }
         }
 
         //Events:
@@ -64,7 +68,7 @@ namespace MPCollab
             mHostCursor1Pos = mCursor2Pos = GetMousePosition();
             screenCenter = new Point((int)SystemParameters.PrimaryScreenWidth / 2, (int)SystemParameters.PrimaryScreenHeight / 2);
             if (this.hostOrClient) this.serverSocket = new TcpListener(IPAddress.Parse(ip), 6656);
-            else this.clientSocket = new TcpClient(ip, 6656);
+            else this.clientIP = ip;
             this.bFormatter = new BinaryFormatter();
         }
 
@@ -121,12 +125,23 @@ namespace MPCollab
             if (this.hostOrClient)
             {
                 this.serverSocket.Start();
-                this.clientSocket = serverSocket.AcceptTcpClient();
+                while (!serverSocket.Pending()) Thread.Sleep(500);
+                serverSocket.AcceptTcpClient();
                 this.clientIP = clientSocket.Client.RemoteEndPoint.ToString();
+                this.connEstablished = true;
             }
-            else NativeMethods.SetCursorPos((int)screenCenter.X, (int)screenCenter.Y);
-            this.bReader = new BinaryReader(clientSocket.GetStream());
-            this.bWriter = new BinaryWriter(clientSocket.GetStream());
+            else
+            {
+                // Creating a ClientSocket also connects to the specified IP. clientSocket.Connect()
+                try { this.clientSocket = new TcpClient(clientIP, 6656); this.connEstablished = true; }
+                catch { this.connEstablished = false; }
+                NativeMethods.SetCursorPos((int)screenCenter.X, (int)screenCenter.Y);
+            }
+            if (this.connEstablished)
+            {
+                this.bReader = new BinaryReader(clientSocket.GetStream());
+                this.bWriter = new BinaryWriter(clientSocket.GetStream());
+            }
         }
         
         public void StartServer()
@@ -312,8 +327,11 @@ namespace MPCollab
             {
                 if (disposing)
                 {
-                    clientSocket.Close();
-                    clientSocket = null;
+                    if (clientSocket != null)
+                    {
+                        clientSocket.Close();
+                        clientSocket = null;
+                    }
                     if (serverSocket != null)
                     {
                         serverSocket.Stop();

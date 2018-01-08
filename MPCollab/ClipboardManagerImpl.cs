@@ -91,6 +91,7 @@ namespace MPCollab
             }
             return new DTOext(tmp, txt, sc, bs, paste);
         }
+
         public void ImportDTOext(DTOext ext)
         {
             if (ext.Audio != null)

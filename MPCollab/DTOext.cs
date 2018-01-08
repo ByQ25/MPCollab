@@ -58,7 +58,6 @@ namespace MPCollab
             info.AddValue("Image", BitmapFromSource(image),typeof(System.Drawing.Bitmap));
             info.AddValue("Paste", paste);
         }
-
         private System.Drawing.Bitmap BitmapFromSource(BitmapSource bitmapsource)
         {
             System.Drawing.Bitmap bitmap;

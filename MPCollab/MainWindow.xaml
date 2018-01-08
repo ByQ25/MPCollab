@@ -27,7 +27,7 @@
         <Viewbox x:Name="vb2" StretchDirection="Both" Stretch="Uniform" Margin="128,39,123,72" Height="71" Width="100" VerticalAlignment="Center">
             <custom:Komputer x:Name="hostComputer"/>
         </Viewbox>
-        <Label x:Name="bottomLabel" Content="Połączenie nie zostało nawiązane." HorizontalAlignment="Right" VerticalAlignment="Bottom" Width="184" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Margin="0,0,10,10" Foreground="White"/>
+        <Label x:Name="bottomLabel" Content="Serwer został uruchomiony." HorizontalAlignment="Right" VerticalAlignment="Bottom" Width="184" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Margin="0,0,10,10" Foreground="White"/>
         <Label x:Name="localIPLabel" Content="Label" HorizontalAlignment="Center" Margin="132,17,139,159" VerticalAlignment="Center" Height="23" Width="86" FontWeight="SemiBold" Foreground="White" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" ToolTip="Adres IP Twojego komputera.">
             <Label.Background>
                 <ImageBrush/>

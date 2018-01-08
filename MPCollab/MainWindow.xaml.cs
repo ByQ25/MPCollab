@@ -23,8 +23,9 @@ namespace MPCollab
         private Thread connMaker;
         private XElement leftCompIP, rightCompIP;
         private XDocument confFile;
-        private DispatcherTimer mainTimer;
+        private DispatcherTimer mainTimer, edgeCheckerTimer;
         private TwoCursorsHandler TCH;
+        private NativeMethods.Win32Point w32MousePos;
         private bool disposed, hostOrClient; // true - host, false - client
         private const int timeWin = 17;
         private const string confPath = "config.xml";
@@ -53,10 +54,6 @@ namespace MPCollab
             }
             else CreateNewConfigXmlDoc(true);
 
-            // Validating IPs
-            if (ValidateTextBoxIP(leftCompIPTB, true)) buttonClientLeft.IsEnabled = true;
-            if (ValidateTextBoxIP(rightCompIPTB, true)) buttonClientRight.IsEnabled = true;
-
             // Adding shortcut and binding commands
             RoutedCommand newCmd = new RoutedCommand();
             newCmd.InputGestures.Add(new KeyGesture(System.Windows.Input.Key.S, ModifierKeys.Control));
@@ -70,13 +67,23 @@ namespace MPCollab
             newCmd.InputGestures.Add(new KeyGesture(System.Windows.Input.Key.V, ModifierKeys.Control));
             CommandBindings.Add(new CommandBinding(newCmd, ControlVExecuted));
 
-            disposed = false;
+            //TODO: Restore app and Main Win Initializer method should be merged
+
             mainTimer = new DispatcherTimer();
             mainTimer.Interval = new TimeSpan(0,0,1);
             mainTimer.Tick += mainTimer_Tick;
 
+            edgeCheckerTimer = new DispatcherTimer();
+            edgeCheckerTimer.Interval = new TimeSpan(0, 0, 0, 0, 500);
+            edgeCheckerTimer.Tick += edgeCheckerTimer_Tick;
+
+            w32MousePos = new NativeMethods.Win32Point();
+            RestoreAppToInitialState("");
             try { this.localIPLabel.Content = GetLocalIPAddress(); }
             catch (ApplicationException) { }
+
+            //Starting server service on the app load.
+            if (this.localIPLabel.Content.ToString() != null) ServerSideProcedure();
         }
 
         // Additional methods:
@@ -90,16 +97,40 @@ namespace MPCollab
 
         private void ServerSideProcedure()
         {
+            // Stopping client side:
+            if (connMaker != null && connMaker.IsAlive && !hostOrClient)
+            {
+                mainTimer.Stop();
+                connMaker.Abort();
+                while (connMaker.IsAlive) Thread.Sleep(1000);
+                connMaker = null;
+                TCH = null;
+                GC.Collect();
+            }
+
             hostOrClient = true;
             if (TCH == null) TCH = new TwoCursorsHandler(localIPLabel.Content.ToString(), timeWin, hostOrClient);
             connMaker = new Thread(TCH.MakeConnection);
+            connMaker.IsBackground = true;
             connMaker.Start();
             mainTimer.Start();
             TCH.OnPushClipboard += TCH.Paste;
+            this.bottomLabel.Content = "Serwer został uruchomiony.";
         }
 
         private void ClientSideProcedure(byte computerTag)
         {
+            // Stopping server side:
+            if (connMaker != null && connMaker.IsAlive && hostOrClient)
+            {
+                mainTimer.Stop();
+                connMaker.Abort();
+                while (connMaker.IsAlive) Thread.Sleep(1000);
+                connMaker = null;
+                TCH = null;
+                GC.Collect();
+            }
+
             if (TCH == null)
             {
                 // Locking mouse cursor in the window:
@@ -115,20 +146,25 @@ namespace MPCollab
                 DisableWindowControls();
                 List<Komputer> comps = new List<Komputer>();
                 comps.Add((Komputer)vb2.Child);
+                string ip = "";
                 switch (computerTag)
                 {
                     case 0:
-                        TCH = new TwoCursorsHandler(leftCompIPTB.Text, timeWin, hostOrClient);
-                        TCH.MakeConnection();
+                        ip = leftCompIPTB.Text;
                         comps.Add((Komputer)vb1.Child);
                         break;
                     case 1:
-                        TCH = new TwoCursorsHandler(rightCompIPTB.Text, timeWin, hostOrClient);
-                        TCH.MakeConnection();
+                        ip = rightCompIPTB.Text;
                         comps.Add((Komputer)vb3.Child);
                         break;
                 }
+                TCH = new TwoCursorsHandler(ip, timeWin, hostOrClient);
+                connMaker = new Thread(TCH.MakeConnection);
+                connMaker.IsBackground = true;
+                connMaker.Start();
+                mainTimer.Start();
                 StartBlinking(comps);
+                this.bottomLabel.Content = "Trwa próba połączenia z hostem.";
             }
         }
 
@@ -146,13 +182,15 @@ namespace MPCollab
         {
             this.leftCompIPTB.IsEnabled = true;
             this.rightCompIPTB.IsEnabled = true;
-            this.buttonClientLeft.IsEnabled = true;
+            if (ValidateTextBoxIP(this.leftCompIPTB, true))
+                buttonClientLeft.IsEnabled = true;
             this.buttonHost.IsEnabled = true;
-            this.buttonClientRight.IsEnabled = true;
+            if (ValidateTextBoxIP(this.rightCompIPTB, true))
+                buttonClientRight.IsEnabled = true; ;
             Mouse.OverrideCursor = Cursors.Arrow;
         }
 
-        private void RestoreAppToInitialState()
+        private void RestoreAppToInitialState(string message)
         {
             if (TCH != null)
             {
@@ -160,11 +198,14 @@ namespace MPCollab
                 TCH.Dispose();
                 TCH = null;
             }
+            disposed = false;
+            hostOrClient = true;
             NativeMethods.ClipCursor(IntPtr.Zero);
             EnableWindowControls();
             Komputer[] comps = { (Komputer)vb1.Child, (Komputer)vb2.Child, (Komputer)vb3.Child };
             StopBlinking(comps);
-            bottomLabel.Content = "Połączenie zosało zakończone.";
+            bottomLabel.Content = message;
+            edgeCheckerTimer.Start();
         }
 
         private void CreateNewConfigXmlDoc(bool save)
@@ -216,7 +257,7 @@ namespace MPCollab
                 case Key.Multiply: ServerSideProcedure(); break;
                 case Key.OemMinus: ClientSideProcedure(0); break;
                 case Key.OemPlus: ClientSideProcedure(1); break;
-                case Key.Escape: RestoreAppToInitialState(); break;
+                case Key.Escape: RestoreAppToInitialState("Połączenie zosało zakończone."); break;
             }
         }
 
@@ -264,20 +305,40 @@ namespace MPCollab
         {
             if (connMaker != null && !connMaker.IsAlive)
             {
-                bottomLabel.Content = "Połączenie zosało nawiązane.";
-                if (hostOrClient)
+                if (TCH.ConnectionEstablished)
                 {
-                    string clientIP = TCH.ClientIP.Split(':')[0];
-                    List<Komputer> comps = new List<Komputer>();
-                    comps.Add((Komputer)vb2.Child);
-                    if (clientIP == leftCompIP.Value)
-                        comps.Add((Komputer)vb1.Child);
-                    else if (clientIP == rightCompIP.Value)
-                        comps.Add((Komputer)vb3.Child);
-                    StartBlinking(comps);
-                    TCH.StartServer();
+                    bottomLabel.Content = "Połączenie zosało nawiązane.";
+                    if (hostOrClient)
+                    {
+                        string clientIP = TCH.ClientIP.Split(':')[0];
+                        List<Komputer> comps = new List<Komputer>();
+                        comps.Add((Komputer)vb2.Child);
+                        if (clientIP == leftCompIP.Value)
+                            comps.Add((Komputer)vb1.Child);
+                        else if (clientIP == rightCompIP.Value)
+                            comps.Add((Komputer)vb3.Child);
+                        StartBlinking(comps);
+                        TCH.StartServer();
+                    }
+                    mainTimer.Stop();
                 }
-                mainTimer.Stop();
+                else RestoreAppToInitialState("Serwer nie odpowiada.");
+                connMaker = null;
+            }
+        }
+
+        private void edgeCheckerTimer_Tick(object sender, EventArgs e)
+        {
+            NativeMethods.GetCursorPos(ref w32MousePos);
+            if (w32MousePos.X == 0 && buttonClientLeft.IsEnabled)
+            {
+                ClientSideProcedure(0);
+                edgeCheckerTimer.Stop();
+            }
+            else if (w32MousePos.X == SystemParameters.PrimaryScreenWidth - 1 && buttonClientRight.IsEnabled)
+            {
+                ClientSideProcedure(1);
+                edgeCheckerTimer.Stop();
             }
         }
 
