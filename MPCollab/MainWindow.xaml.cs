@@ -37,6 +37,7 @@ namespace MPCollab
         public const int VK_LCONTROL = 0xA2; //Left Control key code
         public const int V = 0x56;
 
+        
         public MainWindow()
         {
             InitializeComponent();
@@ -90,6 +91,8 @@ namespace MPCollab
             try { localIPLabel.Content = GetLocalIPAddress(); }
             catch (ApplicationException) { }
             RestoreAppToInitialState("Serwer został uruchomiony.", false);
+
+            
         }
 
         // Additional methods:
@@ -101,6 +104,7 @@ namespace MPCollab
             throw new ApplicationException("Local IP Address Not Found!");
         }
 
+        [STAThread]
         private void ServerSideProcedure()
         {
             // Stopping client side:
@@ -121,6 +125,8 @@ namespace MPCollab
             connMaker.Start();
 
             pasteChecker = new Thread(CheckPaste);
+            pasteChecker.IsBackground = true;
+            pasteChecker.SetApartmentState(ApartmentState.STA);
             pasteChecker.Start();
             mainTimer.Start();
         }
@@ -259,20 +265,24 @@ namespace MPCollab
             }
             else but.IsEnabled = false;
         }
-
+        [STAThread]
         private void CheckPaste()
         {
-            if (TCH.PasteField && hostOrClient)
+            while (hostOrClient)
             {
-                clipboardManager.CopyClipboard();
-                clipboard = TCH.ReceivedClipboard;
-                clipboardManager.ImportDTOext(clipboard);
+                if (TCH.PasteField)
+                {
+                    clipboardManager.CopyClipboard();
+                    clipboard = TCH.ReceivedClipboard;
+                    clipboardManager.ImportDTOext(clipboard);
 
-                NativeMethods.keybd_event(VK_LCONTROL, 0, KEYEVENTF_EXTENDEDKEY, (IntPtr)0);
-                NativeMethods.keybd_event(V, 0, KEYEVENTF_EXTENDEDKEY, (IntPtr)0);
-                NativeMethods.keybd_event(V, 0, KEYEVENTF_KEYUP, (IntPtr)0);
-                NativeMethods.keybd_event(VK_LCONTROL, 0, KEYEVENTF_KEYUP, (IntPtr)0);
-                lock (pasteThreadlock) { TCH.PasteField = false; }
+                    NativeMethods.keybd_event(VK_LCONTROL, 0, KEYEVENTF_EXTENDEDKEY, (IntPtr)0);
+                    NativeMethods.keybd_event(V, 0, KEYEVENTF_EXTENDEDKEY, (IntPtr)0);
+                    NativeMethods.keybd_event(V, 0, KEYEVENTF_KEYUP, (IntPtr)0);
+                    NativeMethods.keybd_event(VK_LCONTROL, 0, KEYEVENTF_KEYUP, (IntPtr)0);
+                    lock (TCH.ThreadLock4Field) { TCH.PasteField = false; }
+                }
+                Thread.Sleep(20);
             }
         }
 

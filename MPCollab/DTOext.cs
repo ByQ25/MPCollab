@@ -40,7 +40,7 @@ namespace MPCollab
             this.fileDropList = (StringCollection)info.GetValue("FileDropList", typeof(StringCollection));
             this.image = new BitmapImage();
             this.paste = info.GetBoolean("Paste");
-            this.image = SourceFromBitmap((System.Drawing.Bitmap)info.GetValue("Image", typeof(System.Drawing.Bitmap)));
+            this.image = Base64ToImage(info.GetString("Image");
         }
 
         public MemoryStream Audio { get { return audio; } }
@@ -55,46 +55,30 @@ namespace MPCollab
             info.AddValue("Text", text);
             info.AddValue("FileDropList", fileDropList, typeof(StringCollection));
             //info.AddValue("Image", image, typeof(BitmapSource));
-            info.AddValue("Image", BitmapFromSource(image),typeof(System.Drawing.Bitmap));
+            info.AddValue("Image", ImageToBase64(image));
             info.AddValue("Paste", paste);
         }
-        private System.Drawing.Bitmap BitmapFromSource(BitmapSource bitmapsource)
+        
+
+        string ImageToBase64(BitmapSource bitmap)
         {
-            System.Drawing.Bitmap bitmap;
-            if (bitmapsource != null)
-            {
-                using (MemoryStream outStream = new MemoryStream())
-                {
-                    BitmapEncoder enc = new BmpBitmapEncoder();
-                    enc.Frames.Add(BitmapFrame.Create(bitmapsource));
-                    enc.Save(outStream);
-                    bitmap = new System.Drawing.Bitmap(outStream);
-                }
-            }
-            else
-            {
-                bitmap = new System.Drawing.Bitmap(1, 1);
-            }
-            
-            return bitmap;
-        }
-        private BitmapSource SourceFromBitmap(System.Drawing.Bitmap bitmap)
-        {
-            byte[] array;
+            var encoder = new PngBitmapEncoder();
+            var frame = BitmapFrame.Create(bitmap);
+            encoder.Frames.Add(frame);
             using (var stream = new MemoryStream())
             {
-                bitmap.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
-                array = stream.ToArray();
+                encoder.Save(stream);
+                return Convert.ToBase64String(stream.ToArray());
             }
+        }
 
-            var img = new BitmapImage();
-            using (MemoryStream outStream = new MemoryStream(array))
+        BitmapSource Base64ToImage(string base64)
+        {
+            byte[] bytes = Convert.FromBase64String(base64);
+            using (var stream = new MemoryStream(bytes))
             {
-                img.BeginInit();
-                img.StreamSource = outStream;
-                img.EndInit();
+                return BitmapFrame.Create(stream);
             }
-            return img;
         }
     }
 }

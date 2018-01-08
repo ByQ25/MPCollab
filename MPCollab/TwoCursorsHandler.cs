@@ -53,7 +53,11 @@ namespace MPCollab
             get { return paste; }
             set { this.paste = value; }
         }
-
+        public object ThreadLock4Field
+        {
+            get { return threadlock4; }
+            set { this.threadlock4 = value; }
+        }
         public TwoCursorsHandler(string ip, int timeWin, bool hostOrClient)
         {
             this.timeWin = timeWin;

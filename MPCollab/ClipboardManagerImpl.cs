@@ -24,7 +24,7 @@ namespace MPCollab
         {
             get { return clipboardTmp; }
         }
-        
+        [STAThread]
         public void CopyClipboard()
         {
             if (Clipboard.ContainsAudio())
@@ -46,7 +46,7 @@ namespace MPCollab
                 clipboardTmp.SetText(Clipboard.GetText());
             }
         }
-
+        [STAThread]
         public void PasteClipboard()
         {
             if (clipboardTmp.ContainsAudio())
@@ -66,7 +66,7 @@ namespace MPCollab
                 Clipboard.SetText(clipboardTmp.GetText());
             }
         }
-
+        [STAThread]
         public DTOext ExportClipboardToDTOext(bool paste)
         {
             MemoryStream tmp = new MemoryStream();
@@ -91,14 +91,14 @@ namespace MPCollab
             }
             return new DTOext(tmp, txt, sc, bs, paste);
         }
-
+        [STAThread]
         public void ImportDTOext(DTOext ext)
         {
             if (ext.Audio != null)
             {
                 Clipboard.SetAudio(ext.Audio);
             }
-            if (ext.FileDropList != null)
+            if (ext.FileDropList != null && ext.FileDropList.Count>0)
             {
                 Clipboard.SetFileDropList(ext.FileDropList);
             }
