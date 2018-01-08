@@ -179,6 +179,7 @@ namespace MPCollab
         {
             this.leftCompIPTB.IsEnabled = false;
             this.rightCompIPTB.IsEnabled = false;
+            this.edgesConnCB.IsEnabled = false;
             this.buttonClientLeft.IsEnabled = false;
             this.buttonHost.IsEnabled = false;
             this.buttonClientRight.IsEnabled = false;
@@ -189,6 +190,7 @@ namespace MPCollab
         {
             this.leftCompIPTB.IsEnabled = true;
             this.rightCompIPTB.IsEnabled = true;
+            this.edgesConnCB.IsEnabled = true;
             if (ValidateTextBoxIP(this.leftCompIPTB, true))
                 buttonClientLeft.IsEnabled = true;
             this.buttonHost.IsEnabled = true;
