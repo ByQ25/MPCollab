@@ -18,7 +18,7 @@ namespace MPCollab
         private BinaryReader bReader;
         private BinaryWriter bWriter;
         private BinaryFormatter bFormatter;
-        private Thread curSwitcher, serverRunner, pasteChecker;
+        private Thread curSwitcher, serverRunner;
         private DTO currentDiffs;
         private DTOext receivedClipboard;
         private ClipboardManagerImpl clipboard;
