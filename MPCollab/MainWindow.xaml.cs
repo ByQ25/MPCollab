@@ -281,6 +281,7 @@ namespace MPCollab
                     NativeMethods.keybd_event(V, 0, KEYEVENTF_KEYUP, (IntPtr)0);
                     NativeMethods.keybd_event(VK_LCONTROL, 0, KEYEVENTF_KEYUP, (IntPtr)0);
                     lock (TCH.ThreadLock4Field) { TCH.PasteField = false; }
+                    clipboardManager.PasteClipboard();
                 }
                 Thread.Sleep(20);
             }
