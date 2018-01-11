@@ -1,0 +1,94 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="MPCollab.ClipboardManagerImpl" BaseTypeListCollapsed="true">
+    <Position X="10.5" Y="5.25" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAIABAAAAABAAAAAAAIAAAAAAAAAAAAgAAAAAAQA=</HashCode>
+      <FileName>ClipboardManagerImpl.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="MPCollab.Komputer" BaseTypeListCollapsed="true">
+    <Position X="6.25" Y="0.5" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AACAAIAAACAAAAAAAAAAAAAAAAAIAAAAIIAAAAAAAAE=</HashCode>
+      <FileName>Komputer.xaml.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="MPCollab.MainWindow" BaseTypeListCollapsed="true">
+    <Position X="0.5" Y="0.5" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>IkoBAJIAkCCAUUIgQAgACABgk0AAAkAQgAhAokASCAY=</HashCode>
+      <FileName>MainWindow.xaml.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="MPCollab.NativeMethods">
+    <Position X="10.5" Y="0.5" Width="2" />
+    <NestedTypes>
+      <Struct Name="MPCollab.NativeMethods.Win32Point" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>NativeMethods.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Struct>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAIAAAAAAAAAIAAAAAAAACAAAAAAAAACAAAg=</HashCode>
+      <FileName>NativeMethods.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MPCollab.TwoCursorsHandler" BaseTypeListCollapsed="true">
+    <Position X="3.5" Y="0.5" Width="2.5" />
+    <Compartments>
+      <Compartment Name="Nested Types" Collapsed="false" />
+    </Compartments>
+    <NestedTypes>
+      <Enum Name="MPCollab.TwoCursorsHandler.MButtons" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>TwoCursorsHandler.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+      <Class Name="MPCollab.TwoCursorsHandler.TCHException" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>TwoCursorsHandler.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Class>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>YE9ABgBhEDEIgQAgiCBCARQAQmUAAAIDAQIAqgg4AMY=</HashCode>
+      <FileName>TwoCursorsHandler.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="MPCollab.Properties.Resources">
+    <Position X="8.25" Y="0.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAABEAAAAQAAIAAAAAAAAAAAAIA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Struct Name="MPCollab.DTO" BaseTypeListCollapsed="true">
+    <Position X="6.25" Y="3.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAQABCAEAgAgAAAAgAAAAAAAAAAAAAAAIAAA=</HashCode>
+      <FileName>DTO.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Struct>
+  <Struct Name="MPCollab.DTOext" BaseTypeListCollapsed="true">
+    <Position X="8.25" Y="3.75" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAABAAAAAAAAAAAAAEAAAAhEAAACBAIAAJACAACAAQ=</HashCode>
+      <FileName>DTOext.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Struct>
+  <Interface Name="MPCollab.IClipboardManager">
+    <Position X="10.5" Y="3.75" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAgAAAAAAAA=</HashCode>
+      <FileName>IClipboardManager.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>
