@@ -296,10 +296,7 @@ namespace MPCollab
         {
             if (bReader != null)
             {
-                // TODO: Remove below commented lines if unnecessary.
-                //clipboard.CopyClipboard();
                 receivedClipboard = (DTOext)bFormatter.Deserialize(bReader.BaseStream);
-                //clipboard.ImportDTOext(receivedClipboard);
 
                 if (receivedClipboard.Paste)
                     lock(threadlock4) { this.paste = true; }
