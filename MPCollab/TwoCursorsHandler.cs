@@ -112,14 +112,7 @@ namespace MPCollab
                 }
         }
 
-        // TODO We should probably delete HandleCopy method
-        public void HandleCopy()
-        {
-            //if(clientSocket != null && clientSocket.Connected && !hostOrClient)
-            //{
-            //    SendClipboard(bReaderExt, bWriterExt, clipboard.ExportClipboardToDTOext(false));
-            //}
-        }
+        
 
         public void HandlePaste()
         {
@@ -164,10 +157,6 @@ namespace MPCollab
                 serverRunner = new Thread(RunServer);
                 serverRunner.IsBackground = true;
                 serverRunner.Start();
-                //TODO: Delete three lines below if they aren't useful
-                //pasteChecker = new Thread(Paste);
-                //pasteChecker.IsBackground = true;
-                //pasteChecker.Start();
             }
         }
 
@@ -370,12 +359,6 @@ namespace MPCollab
                         serverRunner.Abort();
                         serverRunner = null;
                     }
-                    // TODO: Remove commented lines if unnecessary.
-                    //if (pasteChecker != null && pasteChecker.IsAlive)
-                    //{
-                    //    pasteChecker.Abort();
-                    //    pasteChecker = null;
-                    //}
                 }
             }
             this.disposed = true;

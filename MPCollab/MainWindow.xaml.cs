@@ -411,7 +411,7 @@ namespace MPCollab
 
         private void ControlCExecuted(object sender, ExecutedRoutedEventArgs e)
         {
-            if (TCH != null && !hostOrClient) TCH.HandleCopy();
+            
         }
 
         private void ControlVExecuted(object sender, ExecutedRoutedEventArgs e)
