@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MPCollab
 {
@@ -14,7 +10,7 @@ namespace MPCollab
         object ThreadLock4Field { get; }
         bool PasteField { get; set; }
         void HandleMouseMove();
-        void HandleMouseClick(TwoCursorsHandler.MButtons mb);
+        void HandleMouseClick(Enums.MButtons mb);
         void HandlePaste();
         void MakeConnection();
         void StartServer();

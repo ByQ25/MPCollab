@@ -25,9 +25,9 @@ namespace MPCollab
         private XElement leftCompIP, rightCompIP;
         private XDocument confFile;
         private DispatcherTimer mainTimer, edgeCheckerTimer;
-        private ClipboardManagerImpl clipboardManager;
         private NativeMethods.Win32Point w32MousePos;
         private ITwoCursorsHandler TCH;
+        private IClipboardManager clipboardManager;
         private object pasteThreadlock;
         private bool disposed, hostOrClient; // true - host, false - client
         private const int timeWin = 17;
@@ -119,7 +119,7 @@ namespace MPCollab
             }
 
             hostOrClient = true;
-            if (TCH == null) TCH = new TwoCursorsHandler(localIPLabel.Content.ToString(), timeWin, hostOrClient);
+            if (TCH == null) TCH = new TwoCursorsHandlerImpl(localIPLabel.Content.ToString(), timeWin, hostOrClient);
             connMaker = new Thread(TCH.MakeConnection);
             connMaker.IsBackground = true;
             connMaker.Start();
@@ -171,7 +171,7 @@ namespace MPCollab
                         comps.Add((Komputer)vb3.Child);
                         break;
                 }
-                TCH = new TwoCursorsHandler(ip, timeWin, hostOrClient);
+                TCH = new TwoCursorsHandlerImpl(ip, timeWin, hostOrClient);
                 connMaker = new Thread(TCH.MakeConnection);
                 connMaker.IsBackground = true;
                 connMaker.Start();
@@ -347,12 +347,12 @@ namespace MPCollab
 
         private void MainWin_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            if (TCH != null) TCH.HandleMouseClick(TwoCursorsHandler.MButtons.LMB);
+            if (TCH != null) TCH.HandleMouseClick(Enums.MButtons.LMB);
         }
 
         private void MainWin_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
-            if (TCH != null) TCH.HandleMouseClick(TwoCursorsHandler.MButtons.RMB);
+            if (TCH != null) TCH.HandleMouseClick(Enums.MButtons.RMB);
         }
 
         private void mainTimer_Tick(object sender, EventArgs e)

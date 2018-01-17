@@ -8,7 +8,7 @@ using System.Threading;
 
 namespace MPCollab
 {
-    class TwoCursorsHandler : ITwoCursorsHandler
+    class TwoCursorsHandlerImpl : ITwoCursorsHandler
     {
         private Point mHostCursor1Pos, mCursor2Pos, screenCenter;
         private Stopwatch stoper1;
@@ -17,8 +17,8 @@ namespace MPCollab
         private Thread curSwitcher, serverRunner;
         private DTO currentDiffs;
         private DTOext receivedClipboard;
-        private ClipboardManagerImpl clipboard;
         private IDTOHandler DTOHandler;
+        private IClipboardManager clipboard;
         private int timeWin;
         private string clientIP;
         private object[] threadLocks;
@@ -55,7 +55,7 @@ namespace MPCollab
             set { this.paste = value; }
         }
 
-        public TwoCursorsHandler(string ip, int timeWin, bool hostOrClient)
+        public TwoCursorsHandlerImpl(string ip, int timeWin, bool hostOrClient)
         {
             this.timeWin = timeWin;
             this.disposed = false;
@@ -98,13 +98,13 @@ namespace MPCollab
             }
         }
 
-        public void HandleMouseClick(MButtons mb)
+        public void HandleMouseClick(Enums.MButtons mb)
         {
             if (clientSocket != null && clientSocket.Connected && !hostOrClient)
                 switch (mb)
                 {
-                    case MButtons.LMB: DTOHandler.SendDTO(new DTO(0, 0, true, false)); break;
-                    case MButtons.RMB: DTOHandler.SendDTO(new DTO(0, 0, false, true)); break;
+                    case Enums.MButtons.LMB: DTOHandler.SendDTO(new DTO(0, 0, true, false)); break;
+                    case Enums.MButtons.RMB: DTOHandler.SendDTO(new DTO(0, 0, false, true)); break;
                 }
         }
 
@@ -304,8 +304,6 @@ namespace MPCollab
         }
 
         // Public area:
-        public enum MButtons{ LMB, MMB, RMB };
-
         [Serializable]
         public class TCHException : ApplicationException
         {

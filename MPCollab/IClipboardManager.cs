@@ -3,6 +3,8 @@
     interface IClipboardManager
     {
         void CopyClipboard();
-        void PasteClipboard();     
+        void PasteClipboard();
+        DTOext ExportClipboardToDTOext(bool paste);
+        void ImportDTOext(DTOext ext);
     }
 }
