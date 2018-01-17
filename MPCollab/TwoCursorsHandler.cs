@@ -24,8 +24,8 @@ namespace MPCollab
         private ClipboardManagerImpl clipboard;
         private int timeWin;
         private string clientIP;
+        private object[] threadLocks;
         private bool disposed, runServer, switchCursors, hostOrClient, clickLMB, clickRMB, paste, connEstablished;
-        private object threadLock1, threadLock2, threadLock3, threadlock4;
         private const int MOUSEEVENT_K_LEFTDOWN = 0x02;
         private const int MOUSEEVENT_K_LEFTUP = 0x04;
         private const int MOUSEEVENT_K_RIGHTDOWN = 0x08;
@@ -55,9 +55,9 @@ namespace MPCollab
         }
         public object ThreadLock4Field
         {
-            get { return threadlock4; }
-            set { this.threadlock4 = value; }
+            get { return threadLocks[3]; }
         }
+
         public TwoCursorsHandler(string ip, int timeWin, bool hostOrClient)
         {
             this.timeWin = timeWin;
@@ -68,10 +68,11 @@ namespace MPCollab
             this.clickLMB = false;
             this.clickRMB = false;
             this.paste = false;
-            this.threadLock1 = new object();
-            this.threadLock2 = new object();
-            this.threadLock3 = new object();
-            this.threadlock4 = new object();
+            this.threadLocks = new object[4];
+            this.threadLocks[0] = new object();
+            this.threadLocks[1] = new object();
+            this.threadLocks[2] = new object();
+            this.threadLocks[3] = new object();
             this.stoper1 = new Stopwatch();
             this.stoper2 = new Stopwatch();
             this.clipboard = new ClipboardManagerImpl(new DataObject());
@@ -185,8 +186,8 @@ namespace MPCollab
 
         public void StopServer()
         {
-            lock (threadLock1) { this.switchCursors = false; }
-            lock (threadLock2) { this.runServer = false; }
+            lock (threadLocks[0]) { this.switchCursors = false; }
+            lock (threadLocks[1]) { this.runServer = false; }
             if (curSwitcher != null && curSwitcher.IsAlive) curSwitcher.Join();
             if (serverRunner != null && serverRunner.IsAlive) serverRunner.Abort();
         }
@@ -199,7 +200,7 @@ namespace MPCollab
                 NativeMethods.keybd_event(V, 0, KEYEVENTF_EXTENDEDKEY, (IntPtr)0);
                 NativeMethods.keybd_event(V, 0, KEYEVENTF_KEYUP, (IntPtr)0);
                 NativeMethods.keybd_event(VK_LCONTROL, 0, KEYEVENTF_KEYUP, (IntPtr)0);
-                lock (threadlock4) { this.paste = false; }
+                lock (threadLocks[3]) { this.paste = false; }
             }
         }
 
@@ -215,20 +216,20 @@ namespace MPCollab
                     tmpMousePos = GetMousePosition();
                     if (ComputeDistance(mHostCursor1Pos, tmpMousePos) < 128.0)
                         mHostCursor1Pos = tmpMousePos;
-                    lock (threadLock1) { secondCursorPos = mCursor2Pos; }
+                    lock (threadLocks[0]) { secondCursorPos = mCursor2Pos; }
                     if (tmpMousePos.X != secondCursorPos.X && tmpMousePos.Y != secondCursorPos.Y)
                         NativeMethods.SetCursorPos((int)mCursor2Pos.X, (int)mCursor2Pos.Y);
                     if (clickLMB)
                     {
                         NativeMethods.mouse_event(MOUSEEVENT_K_LEFTDOWN, (int)mCursor2Pos.X, (int)mCursor2Pos.Y, 0, (IntPtr)0);
                         NativeMethods.mouse_event(MOUSEEVENT_K_LEFTUP, (int)mCursor2Pos.X, (int)mCursor2Pos.Y, 0, (IntPtr)0);
-                        lock (threadLock3) { this.clickLMB = false; }
+                        lock (threadLocks[2]) { this.clickLMB = false; }
                     }
                     if (clickRMB)
                     {
                         NativeMethods.mouse_event(MOUSEEVENT_K_RIGHTDOWN, (int)mCursor2Pos.X, (int)mCursor2Pos.Y, 0, (IntPtr)0);
                         NativeMethods.mouse_event(MOUSEEVENT_K_RIGHTUP, (int)mCursor2Pos.X, (int)mCursor2Pos.Y, 0, (IntPtr)0);
-                        lock (threadLock3) { this.clickRMB = false; }
+                        lock (threadLocks[2]) { this.clickRMB = false; }
                     }
                     Thread.Sleep(timeWin);
                     NativeMethods.SetCursorPos((int)mHostCursor1Pos.X, (int)mHostCursor1Pos.Y);
@@ -275,7 +276,7 @@ namespace MPCollab
                 currentDiffs = (DTO)bFormatter.Deserialize(bReader.BaseStream);
 
                 // Updating second cursor position in critical section:
-                lock (threadLock1)
+                lock (threadLocks[0])
                 {
                     mCursor2Pos.X += currentDiffs.DiffX;
                     mCursor2Pos.Y += currentDiffs.DiffY;
@@ -283,9 +284,9 @@ namespace MPCollab
 
                 // Mouse clicks handling:
                 if (currentDiffs.LPMClicked)
-                    lock (threadLock3) { this.clickLMB = true; }
+                    lock (threadLocks[2]) { this.clickLMB = true; }
                 if (currentDiffs.PPMClicked)
-                    lock (threadLock3) { this.clickRMB = true; }
+                    lock (threadLocks[2]) { this.clickRMB = true; }
 
                 // Sending acknowledgement:
                 bWriter.Write(true);
@@ -299,7 +300,7 @@ namespace MPCollab
                 receivedClipboard = (DTOext)bFormatter.Deserialize(bReader.BaseStream);
 
                 if (receivedClipboard.Paste)
-                    lock(threadlock4) { this.paste = true; }
+                    lock(threadLocks[3]) { this.paste = true; }
                 
                 bWriter.Write(true);
             }
