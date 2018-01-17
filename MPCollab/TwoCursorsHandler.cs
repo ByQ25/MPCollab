@@ -8,7 +8,7 @@ using System.Threading;
 
 namespace MPCollab
 {
-    class TwoCursorsHandler : IDisposable
+    class TwoCursorsHandler : ITwoCursorsHandler
     {
         private Point mHostCursor1Pos, mCursor2Pos, screenCenter;
         private Stopwatch stoper1;
@@ -33,11 +33,11 @@ namespace MPCollab
         public const int A = 0x41;
         public const int C = 0x43;
         public const int V = 0x56;
-        internal string ClientIP
+        public string ClientIP
         {
             get { return clientIP; }
         }
-        internal bool ConnectionEstablished
+        public bool ConnectionEstablished
         {
             get { return connEstablished; }
         }
@@ -45,14 +45,14 @@ namespace MPCollab
         {
             get { return receivedClipboard; }
         }
+        public object ThreadLock4Field
+        {
+            get { return threadLocks[3]; }
+        }
         public bool PasteField
         {
             get { return paste; }
             set { this.paste = value; }
-        }
-        public object ThreadLock4Field
-        {
-            get { return threadLocks[3]; }
         }
 
         public TwoCursorsHandler(string ip, int timeWin, bool hostOrClient)
@@ -76,7 +76,6 @@ namespace MPCollab
             screenCenter = new Point((int)SystemParameters.PrimaryScreenWidth / 2, (int)SystemParameters.PrimaryScreenHeight / 2);
             if (this.hostOrClient) this.serverSocket = new TcpListener(IPAddress.Parse(ip), 6656);
             else this.clientIP = ip;
-            
         }
 
         public static Point GetMousePosition()
@@ -112,9 +111,7 @@ namespace MPCollab
         public void HandlePaste()
         {
             if (clientSocket != null && clientSocket.Connected && !hostOrClient)
-            {
                 DTOHandler.SendDTO(clipboard.ExportClipboardToDTOext(true));
-            }
         }
 
         // Entry point for GUI or other calling class:

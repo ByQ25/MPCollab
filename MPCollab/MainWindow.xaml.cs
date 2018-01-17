@@ -25,9 +25,9 @@ namespace MPCollab
         private XElement leftCompIP, rightCompIP;
         private XDocument confFile;
         private DispatcherTimer mainTimer, edgeCheckerTimer;
-        private TwoCursorsHandler TCH;
         private ClipboardManagerImpl clipboardManager;
         private NativeMethods.Win32Point w32MousePos;
+        private ITwoCursorsHandler TCH;
         private object pasteThreadlock;
         private bool disposed, hostOrClient; // true - host, false - client
         private const int timeWin = 17;

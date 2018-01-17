@@ -87,6 +87,7 @@
     <Compile Include="DTOHandlerImpl.cs" />
     <Compile Include="IClipboardManager.cs" />
     <Compile Include="IDTOHandler.cs" />
+    <Compile Include="ITwoCursorsHandler.cs" />
     <Compile Include="Komputer.xaml.cs">
       <DependentUpon>Komputer.xaml</DependentUpon>
     </Compile>
