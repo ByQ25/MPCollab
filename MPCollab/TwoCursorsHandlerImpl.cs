@@ -43,7 +43,7 @@ namespace MPCollab
         }
         public bool IsConnectionAlive
         {
-            get { return clientSocket != null ? clientSocket.Connected : false; }
+            get { return (clientSocket != null ? clientSocket.Connected : false); }
         }
         public DTOext ReceivedClipboard
         {
@@ -124,7 +124,7 @@ namespace MPCollab
             if (this.hostOrClient)
             {
                 this.serverSocket.Start();
-                while (!serverSocket.Pending()) Thread.Sleep(500);
+                while (serverSocket != null && !serverSocket.Pending()) Thread.Sleep(500);
                 this.clientSocket = serverSocket.AcceptTcpClient();
                 this.clientIP = clientSocket.Client.RemoteEndPoint.ToString();
                 this.connEstablished = true;
@@ -171,7 +171,7 @@ namespace MPCollab
                     if (dto is DTO) UpdateGuestCursorPosition((DTO)dto);
                     else if (dto is DTOext) UpdateGuestClipboard((DTOext)dto);
                 }
-                catch { StopServer(); }
+                catch { connEstablished = false; StopServer(); }
                 stoper1.Stop();
                 dt = Convert.ToInt32(stoper1.ElapsedMilliseconds);
                 Thread.Sleep(dt < timeWin + 1 ? timeWin - dt : 0);

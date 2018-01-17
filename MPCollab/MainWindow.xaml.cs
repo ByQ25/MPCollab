@@ -85,7 +85,7 @@ namespace MPCollab
 
             connAliveTimer = new DispatcherTimer();
             connAliveTimer.Interval = new TimeSpan(0, 0, 0, 0, 500);
-            connAliveTimer.Tick += edgeCheckerTimer_Tick;
+            connAliveTimer.Tick += connAliveTimer_Tick;
 
             w32MousePos = new NativeMethods.Win32Point();
             clipboardManager = new ClipboardManagerImpl(new DataObject());
@@ -94,8 +94,6 @@ namespace MPCollab
             try { localIPLabel.Content = GetLocalIPAddress(); }
             catch (ApplicationException) { }
             RestoreAppToInitialState("Serwer został uruchomiony.", false);
-
-            
         }
 
         // Additional methods:
@@ -210,7 +208,7 @@ namespace MPCollab
 
         private void RestoreAppToInitialState(string message, bool doWait)
         {
-            if (doWait) Thread.Sleep(2000);
+            if (doWait) Thread.Sleep(1000);
             if (TCH != null)
             {
                 TCH.StopServer();
@@ -268,6 +266,7 @@ namespace MPCollab
             }
             else but.IsEnabled = false;
         }
+
         [STAThread]
         private void CheckPaste()
         {
@@ -312,7 +311,7 @@ namespace MPCollab
                 case Key.OemPlus: ClientSideProcedure(1); break;
                 case Key.Escape:
                     if (TCH != null && TCH.ConnectionEstablished) {
-                        bottomLabel.Content = "Połączenie zosało zakończone.";
+                        bottomLabel.Content = "Połączenie zostało zakończone.";
                         bottomLabel.InvalidateVisual();
                         RestoreAppToInitialState("Serwer został uruchomiony.", true);
                     }
@@ -366,7 +365,7 @@ namespace MPCollab
             {
                 if (TCH.ConnectionEstablished)
                 {
-                    bottomLabel.Content = "Połączenie zosało nawiązane.";
+                    bottomLabel.Content = "Połączenie zostało nawiązane.";
                     if (hostOrClient)
                     {
                         string clientIP = TCH.ClientIP.Split(':')[0];
@@ -408,9 +407,10 @@ namespace MPCollab
 
         private void connAliveTimer_Tick(object sender, EventArgs e)
         {
-            if (!TCH.IsConnectionAlive)
+            if (TCH.IsConnectionAlive && !TCH.ConnectionEstablished)
             {
-                RestoreAppToInitialState("Połączenie zakończone", true);
+                RestoreAppToInitialState("Połączenie zakończone.", true);
+                bottomLabel.Content = "Serwer został uruchomiony.";
                 connAliveTimer.Stop();
             }
         }
