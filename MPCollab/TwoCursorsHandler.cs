@@ -5,23 +5,20 @@ using System.Net.Sockets;
 using System.Windows;
 using System.Diagnostics;
 using System.Threading;
-using System.Runtime.Serialization.Formatters.Binary;
 
 namespace MPCollab
 {
     class TwoCursorsHandler : IDisposable
     {
         private Point mHostCursor1Pos, mCursor2Pos, screenCenter;
-        private Stopwatch stoper1, stoper2;
+        private Stopwatch stoper1;
         private TcpListener serverSocket;
         private TcpClient clientSocket;
-        private BinaryReader bReader;
-        private BinaryWriter bWriter;
-        private BinaryFormatter bFormatter;
         private Thread curSwitcher, serverRunner;
         private DTO currentDiffs;
         private DTOext receivedClipboard;
         private ClipboardManagerImpl clipboard;
+        private IDTOHandler DTOHandler;
         private int timeWin;
         private string clientIP;
         private object[] threadLocks;
@@ -74,13 +71,12 @@ namespace MPCollab
             this.threadLocks[2] = new object();
             this.threadLocks[3] = new object();
             this.stoper1 = new Stopwatch();
-            this.stoper2 = new Stopwatch();
             this.clipboard = new ClipboardManagerImpl(new DataObject());
             mHostCursor1Pos = mCursor2Pos = GetMousePosition();
             screenCenter = new Point((int)SystemParameters.PrimaryScreenWidth / 2, (int)SystemParameters.PrimaryScreenHeight / 2);
             if (this.hostOrClient) this.serverSocket = new TcpListener(IPAddress.Parse(ip), 6656);
             else this.clientIP = ip;
-            this.bFormatter = new BinaryFormatter();
+            
         }
 
         public static Point GetMousePosition()
@@ -96,8 +92,8 @@ namespace MPCollab
             {
                 Point mouseP = GetMousePosition();
                 currentDiffs = new DTO((int)(mouseP.X - screenCenter.X), (int)(mouseP.Y - screenCenter.Y));
-                // Sending JSON via stream in TCPClientSocket:
-                try { SendDTO(bReader, bWriter, currentDiffs); }
+                // Sending serialized object via stream in TCPClientSocket:
+                try { DTOHandler.SendDTO(currentDiffs); }
                 catch { }
                 NativeMethods.SetCursorPos((int)screenCenter.X, (int)screenCenter.Y);
             }
@@ -108,18 +104,16 @@ namespace MPCollab
             if (clientSocket != null && clientSocket.Connected && !hostOrClient)
                 switch (mb)
                 {
-                    case MButtons.LMB: SendDTO(bReader, bWriter, new DTO(0, 0, true, false)); break;
-                    case MButtons.RMB: SendDTO(bReader, bWriter, new DTO(0, 0, false, true)); break;
+                    case MButtons.LMB: DTOHandler.SendDTO(new DTO(0, 0, true, false)); break;
+                    case MButtons.RMB: DTOHandler.SendDTO(new DTO(0, 0, false, true)); break;
                 }
         }
-
-        
 
         public void HandlePaste()
         {
             if (clientSocket != null && clientSocket.Connected && !hostOrClient)
             {
-                SendClipboard(bReader, bWriter, clipboard.ExportClipboardToDTOext(true));
+                DTOHandler.SendDTO(clipboard.ExportClipboardToDTOext(true));
             }
         }
 
@@ -143,8 +137,9 @@ namespace MPCollab
             }
             if (this.connEstablished)
             {
-                this.bReader = new BinaryReader(clientSocket.GetStream());
-                this.bWriter = new BinaryWriter(clientSocket.GetStream());
+                this.DTOHandler = new DTOHandlerImpl(
+                    new BinaryReader(clientSocket.GetStream()),
+                    new BinaryWriter(clientSocket.GetStream()));
             }
         }
         
@@ -171,11 +166,9 @@ namespace MPCollab
                 stoper1.Start();
                 try
                 {
-                    switch (bReader.ReadByte())
-                    {
-                        case 0: UnpackDTO(); break;
-                        case 1: UnpackClipboard(); break;
-                    }
+                    object dto = DTOHandler.UnpackDTO();
+                    if (dto is DTO) UpdateGuestCursorPosition((DTO)dto);
+                    else if (dto is DTOext) UpdateGuestClipboard((DTOext)dto);
                 }
                 catch { StopServer(); }
                 stoper1.Stop();
@@ -238,72 +231,30 @@ namespace MPCollab
             }
         }
 
-        //TODO: Do we want to extract 4-5 methods below to separate module?
-        private void SendDTO(BinaryReader bReader, BinaryWriter bWriter, object dto)
+        private void UpdateGuestCursorPosition(DTO dto)
         {
-            stoper2.Reset();
-            stoper2.Start();
-            // Sending BinaryDTO via stream from TCPClientSocket:
-            if (dto is DTO)
+            currentDiffs = dto;
+
+            // Updating second cursor position in critical section:
+            lock (threadLocks[0])
             {
-                bWriter.Write((byte)0); // DTO type info tag
-                bFormatter.Serialize(bWriter.BaseStream, (DTO)dto);
+                mCursor2Pos.X += currentDiffs.DiffX;
+                mCursor2Pos.Y += currentDiffs.DiffY;
             }
-            else if (dto is DTOext)
-            {
-                bWriter.Write((byte)1); // DTOext type info tag
-                bFormatter.Serialize(bWriter.BaseStream, (DTOext)dto);
-            }
-            else throw new TCHException("Received non supported DTO type.");
-            bWriter.Flush();
-            // TODO: We should add a try{} catch{} here.
-            if (!bReader.ReadBoolean()) throw new TCHException("False acknowledgement received from the server.");
-            stoper2.Stop();
-            int dt = Convert.ToInt32(stoper2.ElapsedMilliseconds);
-            Thread.Sleep(dt < timeWin + 1 ? timeWin - dt : 0);
+
+            // Mouse clicks handling:
+            if (currentDiffs.LPMClicked)
+                lock (threadLocks[2]) { this.clickLMB = true; }
+            if (currentDiffs.PPMClicked)
+                lock (threadLocks[2]) { this.clickRMB = true; }
         }
 
-        private void SendClipboard(BinaryReader bReaderExt, BinaryWriter bWriterExt, DTOext ext)
+        private void UpdateGuestClipboard(DTOext ext)
         {
-            this.SendDTO(bReaderExt, bWriterExt, ext);
-        }
+            receivedClipboard = ext;
 
-        private void UnpackDTO()
-        {
-            if (bReader != null)
-            {
-                // Receiving binary serialized DTO via stream from TCPClientSocket:
-                currentDiffs = (DTO)bFormatter.Deserialize(bReader.BaseStream);
-
-                // Updating second cursor position in critical section:
-                lock (threadLocks[0])
-                {
-                    mCursor2Pos.X += currentDiffs.DiffX;
-                    mCursor2Pos.Y += currentDiffs.DiffY;
-                }
-
-                // Mouse clicks handling:
-                if (currentDiffs.LPMClicked)
-                    lock (threadLocks[2]) { this.clickLMB = true; }
-                if (currentDiffs.PPMClicked)
-                    lock (threadLocks[2]) { this.clickRMB = true; }
-
-                // Sending acknowledgement:
-                bWriter.Write(true);
-            }
-        }
-
-        private void UnpackClipboard()
-        {
-            if (bReader != null)
-            {
-                receivedClipboard = (DTOext)bFormatter.Deserialize(bReader.BaseStream);
-
-                if (receivedClipboard.Paste)
-                    lock(threadLocks[3]) { this.paste = true; }
-                
-                bWriter.Write(true);
-            }
+            if (receivedClipboard.Paste)
+                lock (threadLocks[3]) { this.paste = true; }
         }
 
         private double ComputeDistance(Point p1, Point p2)
@@ -335,17 +286,10 @@ namespace MPCollab
                         serverSocket.Stop();
                         serverSocket = null;
                     }
-                    if (bReader != null)
+                    if (DTOHandler != null)
                     {
-                        bReader.Close();
-                        bReader.Dispose();
-                        bReader = null;
-                    }
-                    if (bWriter != null)
-                    {
-                        bWriter.Close();
-                        bWriter.Dispose();
-                        bWriter = null;
+                        DTOHandler.Dispose();
+                        DTOHandler = null;
                     }
                     if (curSwitcher != null && curSwitcher.IsAlive)
                     {

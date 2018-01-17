@@ -84,7 +84,9 @@
     </ApplicationDefinition>
     <Compile Include="ClipboardManagerImpl.cs" />
     <Compile Include="DTOext.cs" />
+    <Compile Include="DTOHandlerImpl.cs" />
     <Compile Include="IClipboardManager.cs" />
+    <Compile Include="IDTOHandler.cs" />
     <Compile Include="Komputer.xaml.cs">
       <DependentUpon>Komputer.xaml</DependentUpon>
     </Compile>
