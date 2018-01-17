@@ -41,6 +41,10 @@ namespace MPCollab
         {
             get { return connEstablished; }
         }
+        public bool IsConnectionAlive
+        {
+            get { return clientSocket != null ? clientSocket.Connected : false; }
+        }
         public DTOext ReceivedClipboard
         {
             get { return receivedClipboard; }
@@ -93,7 +97,7 @@ namespace MPCollab
                 currentDiffs = new DTO((int)(mouseP.X - screenCenter.X), (int)(mouseP.Y - screenCenter.Y));
                 // Sending serialized object via stream in TCPClientSocket:
                 try { DTOHandler.SendDTO(currentDiffs); }
-                catch { }
+                catch { connEstablished = false; }
                 NativeMethods.SetCursorPos((int)screenCenter.X, (int)screenCenter.Y);
             }
         }

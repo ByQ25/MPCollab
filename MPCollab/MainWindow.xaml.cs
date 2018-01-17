@@ -24,7 +24,7 @@ namespace MPCollab
         private Thread connMaker, pasteChecker;
         private XElement leftCompIP, rightCompIP;
         private XDocument confFile;
-        private DispatcherTimer mainTimer, edgeCheckerTimer;
+        private DispatcherTimer mainTimer, edgeCheckerTimer, connAliveTimer;
         private NativeMethods.Win32Point w32MousePos;
         private ITwoCursorsHandler TCH;
         private IClipboardManager clipboardManager;
@@ -36,7 +36,6 @@ namespace MPCollab
         public const int KEYEVENTF_KEYUP = 0x0002; //Key up flag
         public const int VK_LCONTROL = 0xA2; //Left Control key code
         public const int V = 0x56;
-
         
         public MainWindow()
         {
@@ -83,6 +82,10 @@ namespace MPCollab
             edgeCheckerTimer = new DispatcherTimer();
             edgeCheckerTimer.Interval = new TimeSpan(0, 0, 0, 0, 500);
             edgeCheckerTimer.Tick += edgeCheckerTimer_Tick;
+
+            connAliveTimer = new DispatcherTimer();
+            connAliveTimer.Interval = new TimeSpan(0, 0, 0, 0, 500);
+            connAliveTimer.Tick += edgeCheckerTimer_Tick;
 
             w32MousePos = new NativeMethods.Win32Point();
             clipboardManager = new ClipboardManagerImpl(new DataObject());
@@ -308,9 +311,11 @@ namespace MPCollab
                 case Key.OemMinus: ClientSideProcedure(0); break;
                 case Key.OemPlus: ClientSideProcedure(1); break;
                 case Key.Escape:
-                    bottomLabel.Content = "Połączenie zosało zakończone.";
-                    bottomLabel.InvalidateVisual();
-                    RestoreAppToInitialState("Serwer został uruchomiony.", true);
+                    if (TCH != null && TCH.ConnectionEstablished) {
+                        bottomLabel.Content = "Połączenie zosało zakończone.";
+                        bottomLabel.InvalidateVisual();
+                        RestoreAppToInitialState("Serwer został uruchomiony.", true);
+                    }
                     break;
             }
         }
@@ -375,6 +380,7 @@ namespace MPCollab
                         TCH.StartServer();
                     }
                     mainTimer.Stop();
+                    connAliveTimer.Start();
                 }
                 else RestoreAppToInitialState("Serwer nie odpowiada.", false);
                 connMaker = null;
@@ -397,6 +403,15 @@ namespace MPCollab
                 this.Topmost = true;
                 ClientSideProcedure(1);
                 edgeCheckerTimer.Stop();
+            }
+        }
+
+        private void connAliveTimer_Tick(object sender, EventArgs e)
+        {
+            if (!TCH.IsConnectionAlive)
+            {
+                RestoreAppToInitialState("Połączenie zakończone", true);
+                connAliveTimer.Stop();
             }
         }
 

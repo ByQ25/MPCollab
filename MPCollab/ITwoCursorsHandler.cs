@@ -6,6 +6,7 @@ namespace MPCollab
     {
         string ClientIP { get; }
         bool ConnectionEstablished { get; }
+        bool IsConnectionAlive { get; }
         DTOext ReceivedClipboard { get; }
         object ThreadLock4Field { get; }
         bool PasteField { get; set; }
