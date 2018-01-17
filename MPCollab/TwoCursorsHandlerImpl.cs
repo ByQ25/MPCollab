@@ -41,10 +41,6 @@ namespace MPCollab
         {
             get { return connEstablished; }
         }
-        public bool IsConnectionAlive
-        {
-            get { return (clientSocket != null ? clientSocket.Connected : false); }
-        }
         public DTOext ReceivedClipboard
         {
             get { return receivedClipboard; }
@@ -124,10 +120,15 @@ namespace MPCollab
             if (this.hostOrClient)
             {
                 this.serverSocket.Start();
-                while (serverSocket != null && !serverSocket.Pending()) Thread.Sleep(500);
-                this.clientSocket = serverSocket.AcceptTcpClient();
-                this.clientIP = clientSocket.Client.RemoteEndPoint.ToString();
-                this.connEstablished = true;
+                try
+                {
+                    while (!serverSocket.Pending()) Thread.Sleep(500);
+                    this.clientSocket = serverSocket.AcceptTcpClient();
+                    this.clientIP = clientSocket.Client.RemoteEndPoint.ToString();
+                    this.connEstablished = true;
+                }
+                catch (NullReferenceException) { this.connEstablished = false; }
+                
             }
             else
             {

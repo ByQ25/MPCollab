@@ -152,8 +152,8 @@ namespace MPCollab
                 System.Drawing.Rectangle r = new System.Drawing.Rectangle(
                     (int)lockingRect.X,
                     (int)lockingRect.Y,
-                    (int)(lockingRect.X + this.Width - 7 * SystemParameters.BorderWidth),
-                    (int)(lockingRect.Y + this.Height - 1.3 * SystemParameters.WindowCaptionHeight));
+                    (int)(lockingRect.X + this.Width - 16 * SystemParameters.BorderWidth),
+                    (int)(lockingRect.Y + this.Height - 2 * SystemParameters.WindowCaptionHeight));
                 NativeMethods.ClipCursor(ref r);
 
                 hostOrClient = false;
@@ -407,7 +407,7 @@ namespace MPCollab
 
         private void connAliveTimer_Tick(object sender, EventArgs e)
         {
-            if (TCH.IsConnectionAlive && !TCH.ConnectionEstablished)
+            if (!TCH.ConnectionEstablished)
             {
                 RestoreAppToInitialState("Połączenie zakończone.", true);
                 bottomLabel.Content = "Serwer został uruchomiony.";
